@@ -1,0 +1,113 @@
+﻿<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@ViewData["Title"] – MenuMint</title>
+
+    <!-- Apply saved theme BEFORE paint (no flash) -->
+    <script>
+        (function () {
+            try {
+                var t = localStorage.getItem('mm-theme');
+                if (t) document.documentElement.setAttribute('data-bs-theme', t);
+            } catch (e) { }
+        })();
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/lib/bootstrap-icons/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="icon" type="image/svg+xml" href="~/favicon.svg" />
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body>
+    <header class="mm-nav" id="mmNav">
+        <div class="container d-flex align-items-center justify-content-between">
+            <a asp-controller="Home" asp-action="Index" class="mm-brand">
+                <span class="logo-dot"><i class="bi bi-qr-code-scan"></i></span>
+                Menu<span class="mint">Mint</span>
+            </a>
+
+            <nav class="d-none d-md-flex gap-1">
+                <a class="mm-link" href="/#how">How it works</a>
+                <a class="mm-link" href="/#features">Features</a>
+                <a class="mm-link" href="/#demo">Live demo</a>
+            </nav>
+
+            <div class="d-flex align-items-center gap-2">
+                <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle dark mode">
+                    <i class="bi bi-moon-stars"></i>
+                </button>
+
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <a class="btn btn-soft d-none d-sm-inline-block"
+                       href="@(User.IsInRole("Admin") ? "/Admin/Dashboard" : "/Owner/Dashboard")">Dashboard</a>
+                    <form asp-controller="Account" asp-action="Logout" method="post" class="m-0">
+                        <button type="submit" class="btn btn-ghost"><i class="bi bi-box-arrow-right"></i> Log out</button>
+                    </form>
+                }
+                else
+                {
+                    <a class="btn btn-ghost d-none d-sm-inline-block" href="/Account/Login">Log in</a>
+                    <a class="btn btn-mint" href="/Account/Register">Get started</a>
+                }
+            </div>
+        </div>
+    </header>
+
+    <main>
+        @RenderBody()
+    </main>
+
+    <footer class="mm-footer">
+        <div class="container">
+            <div class="foot-top">
+                <div class="foot-brand">
+                    <a asp-controller="Home" asp-action="Index" class="mm-brand">
+                        <span class="logo-dot"><i class="bi bi-qr-code-scan"></i></span>
+                        MenuMint
+                    </a>
+                    <p class="foot-tag">Scan. Browse.<br /><span>Savor.</span></p>
+                    <div class="foot-pill"><span class="live-dot"></span> Every menu, always fresh</div>
+                </div>
+
+                <div class="foot-col">
+                    <h6>Product</h6>
+                    <ul>
+                        <li><a href="/#how">How it works</a></li>
+                        <li><a href="/#features">Features</a></li>
+                        <li><a href="/#demo">Live demo</a></li>
+                    </ul>
+                </div>
+
+                <div class="foot-col">
+                    <h6>For restaurants</h6>
+                    <ul>
+                        <li><a href="/Account/Register">Create your menu</a></li>
+                        <li><a href="/Account/Login">Log in</a></li>
+                        <li><a href="/Owner/Dashboard">Dashboard</a></li>
+                    </ul>
+                </div>
+            </div>
+
+         <div class="foot-giant" aria-hidden="true">MenuMint</div>
+
+            <div class="foot-bottom">
+                <span>© @DateTime.Now.Year MenuMint · Your QR-based digital menu </span>
+                <span>Made with ☕ and zero reprinted menus · by Hifza Rasool</span>
+            </div>
+        </div>
+    </footer>
+
+    <div class="mm-toast-wrap" id="toastWrap"></div>
+
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-\version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

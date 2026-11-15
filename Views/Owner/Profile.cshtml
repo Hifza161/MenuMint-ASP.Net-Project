@@ -1,0 +1,203 @@
+﻿@model MenuMint.ViewModels.ProfileFormViewModel
+@{
+    Layout = "_OwnerLayout";
+    ViewData["Title"] = "Restaurant profile";
+    var slug = ViewData["Slug"] as string ?? "";
+}
+
+<form asp-action="Profile" method="post" enctype="multipart/form-data" novalidate>
+    <input type="hidden" name="RemoveLogo" id="removeLogo" value="false" />
+    <input type="hidden" name="RemoveCover" id="removeCover" value="false" />
+    <div asp-validation-summary="ModelOnly" class="mm-alert-error"></div>
+
+    <div class="form-grid">
+        <div class="mm-card p-4" data-reveal>
+            <h2 class="h5 mb-1">About your restaurant</h2>
+            <p class="text-muted-mm mb-4">Guests see this at the top of your public menu.</p>
+
+            <div class="row g-3">
+                <div class="col-12">
+                    <label asp-for="Name" class="form-label"></label>
+                    <input asp-for="Name" class="form-control" maxlength="100" autocomplete="off" />
+                    <span asp-validation-for="Name" class="mm-field-error"></span>
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label">Public menu link</label>
+                    <div class="slug-preview">
+                        <i class="bi bi-lock-fill"></i>
+                        <code>/m/@slug</code>
+                        <small class="ms-auto">Permanent, so printed QR codes keep working</small>
+                    </div>
+                </div>
+
+                <div class="col-12">
+                    <div class="d-flex justify-content-between">
+                        <label asp-for="Description" class="form-label"></label>
+                        <small class="text-muted-mm" id="descCount">0/300</small>
+                    </div>
+                    <textarea asp-for="Description" class="form-control" rows="3" maxlength="300" placeholder="Tell guests what makes your place special…"></textarea>
+                    <span asp-validation-for="Description" class="mm-field-error"></span>
+                </div>
+
+                <div class="col-md-7">
+                    <label asp-for="Address" class="form-label"></label>
+                    <div class="input-icon">
+                        <i class="bi bi-geo-alt"></i>
+                        <input asp-for="Address" class="form-control" placeholder="Street, area, city" maxlength="200" />
+                    </div>
+                    <span asp-validation-for="Address" class="mm-field-error"></span>
+                </div>
+                <div class="col-md-5">
+                    <label asp-for="Phone" class="form-label"></label>
+                    <div class="input-icon">
+                        <i class="bi bi-telephone"></i>
+                        <input asp-for="Phone" class="form-control" placeholder="0300 1234567" inputmode="tel" />
+                    </div>
+                    <span asp-validation-for="Phone" class="mm-field-error"></span>
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label">Cover photo <span class="text-muted-mm fw-normal">(optional, shown at the top of your menu)</span></label>
+                    <label for="CoverFile" class="dropzone" id="cvDz">
+                        <i class="bi bi-image"></i>
+                        <div class="fw-bold mt-1">Click or drag a wide photo here</div>
+                        <div class="small text-muted-mm">Best at 16:9, JPG, PNG or WEBP · max 3 MB</div>
+                    </label>
+                    <div class="dz-preview" id="cvPreview" style="height:170px">
+                        <img id="cvImg" alt="Cover photo" />
+                        <button type="button" class="btn btn-light btn-sm dz-remove" id="cvRemove"><i class="bi bi-trash3"></i> Remove</button>
+                    </div>
+                    <input type="file" asp-for="CoverFile" class="d-none" accept="image/png,image/jpeg,image/webp" />
+                    <span asp-validation-for="CoverFile" class="mm-field-error"></span>
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label">Logo <span class="text-muted-mm fw-normal">(optional)</span></label>
+                    <label for="LogoFile" class="dropzone" id="dz">
+                        <i class="bi bi-cloud-arrow-up"></i>
+                        <div class="fw-bold mt-1">Click or drag your logo here</div>
+                        <div class="small text-muted-mm">JPG, PNG or WEBP · max 2 MB</div>
+                    </label>
+                    <div class="dz-preview" id="dzPreview" style="height:170px">
+                        <img id="dzImg" alt="Logo" style="object-fit:contain;background:var(--mm-mint-50)" />
+                        <button type="button" class="btn btn-light btn-sm dz-remove" id="dzRemove"><i class="bi bi-trash3"></i> Remove</button>
+                    </div>
+                    <input type="file" asp-for="LogoFile" class="d-none" accept="image/png,image/jpeg,image/webp" />
+                    <span asp-validation-for="LogoFile" class="mm-field-error"></span>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-end mt-4 pt-3 border-top">
+                <button type="submit" class="btn btn-mint"><i class="bi bi-check2-circle me-1"></i> Save profile</button>
+            </div>
+        </div>
+
+        <aside class="preview-sticky" data-reveal data-reveal-delay="1">
+            <div class="small fw-bold text-muted-mm mb-2 text-uppercase" style="letter-spacing:.1em">Live preview</div>
+            <div class="rp-card">
+                <div class="rp-head" id="pvHead">
+                    <div class="rp-logo"><img id="pvLogo" class="d-none" alt="" /><span id="pvInitial">S</span></div>
+                    <h3 class="rp-name" id="pvName">Restaurant</h3>
+                    <p class="rp-desc" id="pvDesc"></p>
+                    <div class="rp-meta">
+                        <span id="pvAddrWrap" class="d-none"><i class="bi bi-geo-alt-fill"></i> <span id="pvAddr"></span></span>
+                        <span id="pvPhoneWrap" class="d-none"><i class="bi bi-telephone-fill"></i> <span id="pvPhone"></span></span>
+                    </div>
+                </div>
+                <div class="rp-body">
+                    <div class="chip-row" style="padding:0 0 .6rem"><span class="chip active">All</span><span class="chip">Starters</span><span class="chip">Mains</span></div>
+                    <div class="dish"><div class="thumb">🍕</div><div><div class="dish-name">Your dishes appear here</div><div class="dish-desc">Names, prices and photos</div></div></div>
+                </div>
+            </div>
+            <p class="small text-muted-mm mt-2">The top of your public menu page.</p>
+        </aside>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        (function () {
+            const $ = id => document.getElementById(id);
+            const nameI = $('Name'), descI = $('Description'), addrI = $('Address'), phoneI = $('Phone'),
+                  fileI = $('LogoFile'), removeI = $('removeLogo'), dz = $('dz'), dzPrev = $('dzPreview'), dzImg = $('dzImg');
+            let logoSrc = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ExistingLogoPath ?? ""));
+
+            function render() {
+                const name = nameI.value.trim() || 'Restaurant';
+                $('pvName').textContent = name;
+                $('pvInitial').textContent = name[0].toUpperCase();
+                $('pvDesc').textContent = descI.value.trim() || 'Your description appears here.';
+                $('descCount').textContent = descI.value.length + '/300';
+                $('pvAddr').textContent = addrI.value.trim();
+                $('pvPhone').textContent = phoneI.value.trim();
+                $('pvAddrWrap').classList.toggle('d-none', !addrI.value.trim());
+                $('pvPhoneWrap').classList.toggle('d-none', !phoneI.value.trim());
+                $('pvLogo').src = logoSrc || '';
+                $('pvLogo').classList.toggle('d-none', !logoSrc);
+                $('pvInitial').classList.toggle('d-none', !!logoSrc);
+            }
+
+            function setLogo(src) {
+                logoSrc = src || '';
+                dzImg.src = logoSrc;
+                dzPrev.style.display = logoSrc ? 'block' : 'none';
+                dz.style.display = logoSrc ? 'none' : 'block';
+                render();
+            }
+
+            function handleFile(f) {
+                if (!['image/jpeg', 'image/png', 'image/webp'].includes(f.type)) { MM.toast('⚠️ Only JPG, PNG or WEBP images.'); fileI.value = ''; return; }
+                if (f.size > 2 * 1024 * 1024) { MM.toast('⚠️ Logo must be 2 MB or smaller.'); fileI.value = ''; return; }
+                removeI.value = 'false';
+                const r = new FileReader();
+                r.onload = e => setLogo(e.target.result);
+                r.readAsDataURL(f);
+            }
+
+            fileI.addEventListener('change', () => { if (fileI.files[0]) handleFile(fileI.files[0]); });
+            $('dzRemove').addEventListener('click', () => { fileI.value = ''; removeI.value = 'true'; setLogo(''); });
+            ['dragenter', 'dragover'].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.classList.add('drag'); }));
+            ['dragleave', 'drop'].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.classList.remove('drag'); }));
+            dz.addEventListener('drop', e => { if (e.dataTransfer.files.length) { fileI.files = e.dataTransfer.files; handleFile(e.dataTransfer.files[0]); } });
+
+            [nameI, descI, addrI, phoneI].forEach(el => el.addEventListener('input', render));
+            setLogo(logoSrc);
+        })();
+    </script>
+    <script>
+        (function () {
+            const $ = id => document.getElementById(id);
+            const fileI = $('CoverFile'), removeI = $('removeCover'), dz = $('cvDz'),
+                  prev = $('cvPreview'), img = $('cvImg'), head = $('pvHead');
+            let src = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ExistingCoverPath ?? ""));
+
+            function show(s) {
+                src = s || '';
+                img.src = src;
+                prev.style.display = src ? 'block' : 'none';
+                dz.style.display = src ? 'none' : 'block';
+                head.style.setProperty('--cover', src ? 'url("' + src + '")' : 'none');
+                head.classList.toggle('has-cover', !!src);
+            }
+
+            function handle(f) {
+                if (!['image/jpeg', 'image/png', 'image/webp'].includes(f.type)) { MM.toast('⚠️ Only JPG, PNG or WEBP images.'); fileI.value = ''; return; }
+                if (f.size > 3 * 1024 * 1024) { MM.toast('⚠️ Cover photo must be 3 MB or smaller.'); fileI.value = ''; return; }
+                removeI.value = 'false';
+                const r = new FileReader();
+                r.onload = e => show(e.target.result);
+                r.readAsDataURL(f);
+            }
+
+            fileI.addEventListener('change', () => { if (fileI.files[0]) handle(fileI.files[0]); });
+            $('cvRemove').addEventListener('click', () => { fileI.value = ''; removeI.value = 'true'; show(''); });
+            ['dragenter', 'dragover'].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.classList.add('drag'); }));
+            ['dragleave', 'drop'].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.classList.remove('drag'); }));
+            dz.addEventListener('drop', e => { if (e.dataTransfer.files.length) { fileI.files = e.dataTransfer.files; handle(e.dataTransfer.files[0]); } });
+
+            show(src);
+        })();
+    </script>
+}

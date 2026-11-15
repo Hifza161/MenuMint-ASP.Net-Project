@@ -1,0 +1,186 @@
+﻿@model MenuMint.Models.Restaurant
+@{
+    Layout = "_OwnerLayout";
+    ViewData["Title"] = "QR code";
+    var menuUrl = ViewData["MenuUrl"] as string ?? "";
+    var shortUrl = menuUrl.Replace("https://", "").Replace("http://", "");
+}
+
+<div class="page-head" data-reveal>
+    <p class="page-lead">Print it once. <strong>It always shows your latest menu</strong>, even after prices change.</p>
+</div>
+
+<div class="qr-grid">
+    <!-- Controls -->
+    <div class="d-grid gap-3" data-reveal>
+        <div class="mm-card p-4">
+            <h5 class="mb-3">Customize</h5>
+
+            <label class="form-label">Card headline</label>
+            <input id="headline" class="form-control mb-3" value="Scan for our menu" maxlength="30" />
+
+            <label class="form-label">QR color</label>
+            <div class="swatches mb-3" id="swatches">
+                <button type="button" class="swatch active" data-color="#0b8556" style="--c:#0b8556" title="Mint"></button>
+                <button type="button" class="swatch" data-color="#0f1f1a" style="--c:#0f1f1a" title="Ink"></button>
+                <button type="button" class="swatch" data-color="#c0432a" style="--c:#c0432a" title="Chili"></button>
+                <button type="button" class="swatch" data-color="#5b21b6" style="--c:#5b21b6" title="Plum"></button>
+                <button type="button" class="swatch" data-color="#1d4ed8" style="--c:#1d4ed8" title="Blue"></button>
+            </div>
+
+            <label class="avail mb-1">
+                <div class="form-check form-switch m-0"><input class="form-check-input" type="checkbox" role="switch" id="rounded" checked /></div>
+                <span>Rounded dots</span>
+            </label>
+            <div class="small text-muted-mm">Tip: keep the color dark. Light colors are harder to scan.</div>
+        </div>
+
+        <div class="mm-card p-4">
+            <h5 class="mb-3">Download &amp; share</h5>
+            <div class="d-grid gap-2">
+                <button type="button" class="btn btn-mint" id="dlPng"><i class="bi bi-image me-1"></i> Download PNG</button>
+                <button type="button" class="btn btn-soft" id="dlSvg"><i class="bi bi-filetype-svg me-1"></i> Download SVG (best for print)</button>
+                <button type="button" class="btn btn-ghost" id="printBtn"><i class="bi bi-printer me-1"></i> Print table card</button>
+            </div>
+            <div class="live-link mt-3 qr-link">
+                <i class="bi bi-link-45deg"></i>
+                <input type="text" id="menuUrl" value="@menuUrl" readonly />
+                <button type="button" class="btn btn-sm btn-soft" id="copyUrl"><i class="bi bi-clipboard"></i></button>
+            </div>
+        </div>
+
+        <div class="mm-card p-4 tip-card">
+            <strong><i class="bi bi-phone me-1"></i> Scanning from your phone?</strong>
+            <p class="small text-muted-mm mb-0 mt-1">
+                A QR for <code>localhost</code> only opens on this computer. For a phone demo, open the site using your PC's Wi-Fi IP address
+                (like <code>http://192.168.x.x:port</code>) and regenerate. After you deploy online, the QR just works.
+            </p>
+        </div>
+    </div>
+
+    <!-- Table card -->
+    <div class="tent-wrap" data-reveal data-reveal-delay="1">
+        <div class="tent" id="tent">
+            <div class="tent-top">
+                <div class="tent-logo">
+                    @if (!string.IsNullOrEmpty(Model.LogoPath))
+                    {
+                        <img src="@Model.LogoPath" alt="" />
+                    }
+                    else
+                    {
+
+                        <span>🍽️</span>
+                    }
+                </div>
+                <div class="tent-name">@Model.Name</div>
+            </div>
+            <div class="tent-headline" id="tentHeadline">Scan for our menu</div>
+            <div class="tent-qr"><canvas id="qrCanvas"></canvas></div>
+            <div class="tent-steps">
+                <span><b>1</b> Open camera</span><span><b>2</b> Point at code</span><span><b>3</b> Tap the link</span>
+            </div>
+            <div class="tent-url">@shortUrl</div>
+            <div class="tent-foot">Powered by MenuMint</div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/lib/qrcode-generator/qrcode.js"></script>
+    <script>
+        (function () {
+            const $ = id => document.getElementById(id);
+            const url = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(menuUrl));
+            const slug = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.Slug));
+            const canvas = $('qrCanvas');
+
+            if (typeof qrcode === 'undefined') {
+                canvas.replaceWith(Object.assign(document.createElement('div'), {
+                    className: 'small text-danger fw-bold p-3',
+                    textContent: 'QR library missing. Right-click libman.json and choose Restore Client-Side Libraries.'
+                }));
+                return;
+            }
+
+            const qr = qrcode(0, 'M');
+            qr.addData(url);
+            qr.make();
+
+            let color = '#0b8556', rounded = true;
+            const QUIET = 2;
+
+            function draw(cv, size) {
+                const n = qr.getModuleCount(), cell = size / (n + QUIET * 2);
+                cv.width = cv.height = size;
+                const ctx = cv.getContext('2d');
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, size, size);
+                ctx.fillStyle = color;
+                for (let r = 0; r < n; r++) {
+                    for (let c = 0; c < n; c++) {
+                        if (!qr.isDark(r, c)) continue;
+                        const x = (c + QUIET) * cell, y = (r + QUIET) * cell;
+                        if (rounded && ctx.roundRect) {
+                            ctx.beginPath();
+                            ctx.roundRect(x + cell * .04, y + cell * .04, cell * .92, cell * .92, cell * .3);
+                            ctx.fill();
+                        } else {
+                            ctx.fillRect(x, y, cell + .5, cell + .5);
+                        }
+                    }
+                }
+            }
+
+            function buildSvg() {
+                const n = qr.getModuleCount(), s = n + QUIET * 2;
+                let d = '';
+                for (let r = 0; r < n; r++)
+                    for (let c = 0; c < n; c++)
+                        if (qr.isDark(r, c)) d += `M${c + QUIET} ${r + QUIET}h1v1h-1z`;
+                return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${s} ${s}" shape-rendering="crispEdges"><rect width="${s}" height="${s}" fill="#fff"/><path fill="${color}" d="${d}"/></svg>`;
+            }
+
+            function save(blob, filename) {
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+            }
+
+            const render = () => draw(canvas, 640);
+            render();
+
+            // Controls
+            $('swatches').addEventListener('click', e => {
+                const b = e.target.closest('.swatch'); if (!b) return;
+                document.querySelectorAll('.swatch').forEach(x => x.classList.remove('active'));
+                b.classList.add('active');
+                color = b.dataset.color; render();
+            });
+            $('rounded').addEventListener('change', e => { rounded = e.target.checked; render(); });
+            $('headline').addEventListener('input', e => { $('tentHeadline').textContent = e.target.value.trim() || 'Scan for our menu'; });
+
+            // Downloads
+            $('dlPng').addEventListener('click', () => {
+                const big = document.createElement('canvas');
+                draw(big, 1200);
+                big.toBlob(b => { save(b, `${slug}-qr.png`); MM.toast('QR code downloaded 📥'); });
+            });
+            $('dlSvg').addEventListener('click', () => {
+                save(new Blob([buildSvg()], { type: 'image/svg+xml' }), `${slug}-qr.svg`);
+                MM.toast('SVG downloaded 📥');
+            });
+            $('printBtn').addEventListener('click', () => window.print());
+
+            $('copyUrl').addEventListener('click', async () => {
+                try { await navigator.clipboard.writeText(url); }
+                catch { $('menuUrl').select(); document.execCommand('copy'); }
+                MM.toast('Menu link copied 🔗');
+            });
+        })();
+    </script>
+}

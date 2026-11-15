@@ -1,0 +1,153 @@
+﻿@model MenuMint.ViewModels.AdminDashboardViewModel
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Admin dashboard";
+    var max = Math.Max(1, Model.Months.Max(m => m.Count));
+    var maxItems = Math.Max(1, Model.Largest.Any() ? Model.Largest.Max(r => r.Items) : 1);
+    var adminName = ViewData["AdminName"] as string ?? "Admin";
+}
+
+<div class="mb-4" data-reveal>
+    <h2 class="h3 mb-1">Welcome, @adminName 👋</h2>
+    <p class="text-muted-mm mb-0">Here's the state of the MenuMint platform.</p>
+</div>
+
+<!-- Stat cards -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-xl-3" data-reveal>
+        <div class="mm-card stat-card">
+            <div class="stat-icon"><i class="bi bi-shop-window"></i></div>
+            <div class="stat-num" data-count="@Model.Total">0</div>
+            <div class="stat-label">Restaurants</div>
+        </div>
+    </div>
+    <div class="col-6 col-xl-3" data-reveal data-reveal-delay="1">
+        <div class="mm-card stat-card">
+            <div class="stat-icon"><i class="bi bi-check2-circle"></i></div>
+            <div class="stat-num" data-count="@Model.Active">0</div>
+            <div class="stat-label">Active</div>
+        </div>
+    </div>
+    <div class="col-6 col-xl-3" data-reveal data-reveal-delay="2">
+        <div class="mm-card stat-card">
+            <div class="stat-icon butter"><i class="bi bi-pause-circle"></i></div>
+            <div class="stat-num" data-count="@Model.Inactive">0</div>
+            <div class="stat-label">Deactivated</div>
+        </div>
+    </div>
+    <div class="col-6 col-xl-3" data-reveal data-reveal-delay="3">
+        <div class="mm-card stat-card">
+            <div class="stat-icon coral"><i class="bi bi-egg-fried"></i></div>
+            <div class="stat-num" data-count="@Model.TotalItems">0</div>
+            <div class="stat-label">Menu items listed</div>
+        </div>
+    </div>
+</div>
+
+<!-- Two columns: left (8) and right (4) must both sit inside THIS row -->
+<div class="row g-4">
+
+    <!-- LEFT -->
+    <div class="col-xl-8">
+        <div class="mm-card p-4 mb-4" data-reveal>
+            <div class="d-flex justify-content-between align-items-center mb-1">
+                <h5 class="m-0">New restaurants</h5>
+                <span class="badge-soft">Last 6 months</span>
+            </div>
+            <p class="small text-muted-mm">How many restaurants joined each month.</p>
+            <div class="bars">
+                @foreach (var m in Model.Months)
+                {
+                    <div class="bar-col">
+                        <div class="bar-val">@m.Count</div>
+                        <div class="bar" style="--h:@(m.Count * 100 / max)%"></div>
+                        <div class="bar-label">@m.Label</div>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="mm-card p-4" data-reveal>
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h5 class="m-0">Recently joined</h5>
+                <a href="/Admin/Restaurants" class="small fw-bold">View all</a>
+            </div>
+            @foreach (var r in Model.Recent)
+            {
+                <div class="recent-row">
+                    <div class="r-avatar">@r.Name[0]</div>
+                    <div class="flex-grow-1 min-w-0">
+                        <div class="fw-bold text-truncate">@r.Name</div>
+                        <div class="small text-muted-mm">@r.OwnerName · joined @r.Joined.ToString("dd MMM yyyy")</div>
+                    </div>
+                    @if (r.IsActive)
+                    {
+                        <span class="badge-soft">Active</span>
+                    }
+                    else
+                    {
+
+                        <span class="badge-off">Deactivated</span>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- RIGHT -->
+    <div class="col-xl-4">
+        <div class="mm-card p-4 mb-4" data-reveal>
+            <h5 class="mb-3">Account status</h5>
+
+            <div class="status-split">
+                <div class="ring" data-percent="@Model.ActivePercent" style="--p:0">
+                    <span class="ring-num">@Model.ActivePercent%</span>
+                </div>
+                <ul class="legend">
+                    <li><span class="dot on"></span> Active <strong>@Model.Active</strong></li>
+                    <li><span class="dot off"></span> Deactivated <strong>@Model.Inactive</strong></li>
+                </ul>
+            </div>
+
+            <div class="attention">
+                @if (Model.Deactivated.Any())
+                {
+                    <div class="small fw-bold mb-2">Needs a look</div>
+                    foreach (var r in Model.Deactivated)
+                    {
+                        <a href="/Admin/Restaurants" class="attn-row">
+                            <span class="r-avatar">@r.Name[0]</span>
+                            <span class="flex-grow-1 min-w-0">
+                                <span class="d-block fw-semibold text-truncate">@r.Name</span>
+                                <span class="d-block small text-muted-mm text-truncate">@r.OwnerName</span>
+                            </span>
+                            <i class="bi bi-chevron-right text-muted-mm"></i>
+                        </a>
+                    }
+                }
+                else
+                {
+                    <div class="attn-clear"><i class="bi bi-check2-circle"></i> All accounts are active</div>
+                }
+            </div>
+        </div>
+
+        <div class="mm-card p-4" data-reveal>
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="m-0">Largest menus</h5>
+                <a href="/Admin/Restaurants" class="small fw-bold">View all</a>
+            </div>
+            @foreach (var r in Model.Largest)
+            {
+                <div class="rank-row">
+                    <div class="rank-top">
+                        <span class="text-truncate fw-semibold">@r.Name</span>
+                        <span class="small text-muted-mm text-nowrap">@r.Items items</span>
+                    </div>
+                    <div class="rank-track"><div class="rank-fill" style="--w:@(r.Items * 100 / maxItems)%"></div></div>
+                </div>
+            }
+        </div>
+    </div>
+
+</div>

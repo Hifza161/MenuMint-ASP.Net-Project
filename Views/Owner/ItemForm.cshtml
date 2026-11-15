@@ -1,0 +1,190 @@
+﻿@model MenuMint.ViewModels.ItemFormViewModel
+@{
+    Layout = "_OwnerLayout";
+    var isEdit = Model.MenuItemId > 0;
+    ViewData["Title"] = isEdit ? "Edit menu item" : "Add menu item";
+    var emojis = new[] { "🍕", "🍔", "🍟", "🌭", "🥪", "🌮", "🌯", "🥗", "🍝", "🍜", "🍛", "🍣", "🍤", "🍗", "🥩", "🍳", "🥞", "🧇", "🥖", "🍞", "🧁", "🍰", "🍩", "🍪", "🍫", "🍨", "🍦", "☕", "🍵", "🥤", "🍹", "🧋", "🥛", "🍉", "🍓", "🍽️" };
+}
+
+<a asp-action="Items" class="back-link" data-reveal><i class="bi bi-arrow-left"></i> Back to menu items</a>
+
+<form asp-action="ItemForm" method="post" enctype="multipart/form-data" novalidate>
+    <input type="hidden" asp-for="MenuItemId" />
+    <input type="hidden" asp-for="Emoji" />
+    <input type="hidden" name="RemoveImage" id="removeImage" value="false" />
+    <div asp-validation-summary="ModelOnly" class="mm-alert-error"></div>
+
+    <div class="form-grid">
+        <!-- LEFT: fields -->
+        <div class="mm-card p-4" data-reveal>
+            <div class="row g-3">
+                <div class="col-md-7">
+                    <label asp-for="Name" class="form-label"></label>
+                    <input asp-for="Name" class="form-control" placeholder="e.g. Margherita Pizza" maxlength="80" autocomplete="off" />
+                    <span asp-validation-for="Name" class="mm-field-error"></span>
+                </div>
+                <div class="col-md-5">
+                    <label asp-for="CategoryId" class="form-label"></label>
+                    <select asp-for="CategoryId" asp-items="Model.Categories" class="form-select">
+                        <option value="0">Choose a category…</option>
+                    </select>
+                    <span asp-validation-for="CategoryId" class="mm-field-error"></span>
+                </div>
+
+                <div class="col-md-5">
+                    <label asp-for="Price" class="form-label"></label>
+                    <div class="input-group">
+                        <span class="input-group-text">Rs.</span>
+                        <input asp-for="Price" type="number" min="1" step="1" class="form-control" placeholder="1200" />
+                    </div>
+                    <span asp-validation-for="Price" class="mm-field-error"></span>
+                </div>
+                <div class="col-md-7 d-flex align-items-end">
+                    <label class="avail pb-2">
+                        <div class="form-check form-switch m-0">
+                            <input asp-for="IsAvailable" class="form-check-input" role="switch" />
+                        </div>
+                        <span>Available to order right now</span>
+                    </label>
+                </div>
+
+                <div class="col-12">
+                    <div class="d-flex justify-content-between">
+                        <label asp-for="Description" class="form-label"></label>
+                        <small class="text-muted-mm" id="descCount">0/200</small>
+                    </div>
+                    <textarea asp-for="Description" class="form-control" rows="3" maxlength="200" placeholder="Fresh basil, mozzarella, wood-fired crust…"></textarea>
+                    <span asp-validation-for="Description" class="mm-field-error"></span>
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label">Photo <span class="text-muted-mm fw-normal">(optional)</span></label>
+                    <label for="ImageFile" class="dropzone" id="dz">
+                        <i class="bi bi-cloud-arrow-up"></i>
+                        <div class="fw-bold mt-1">Click or drag an image here</div>
+                        <div class="small text-muted-mm">JPG, PNG or WEBP · max 2 MB</div>
+                    </label>
+                    <div class="dz-preview" id="dzPreview">
+                        <img id="dzImg" alt="Selected photo" />
+                        <button type="button" class="btn btn-light btn-sm dz-remove" id="dzRemove"><i class="bi bi-trash3"></i> Remove</button>
+                    </div>
+                    <input type="file" asp-for="ImageFile" class="d-none" accept="image/png,image/jpeg,image/webp" />
+                    <span asp-validation-for="ImageFile" class="mm-field-error"></span>
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label">No photo? Pick an icon</label>
+                    <div class="emoji-grid" id="emojiGrid">
+                        @foreach (var e in emojis)
+                        {
+                            <button type="button" class="emoji-btn" data-emoji="@e">@e</button>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex flex-wrap gap-2 justify-content-end mt-4 pt-3 border-top">
+                <a asp-action="Items" class="btn btn-ghost">Cancel</a>
+                <button type="submit" class="btn btn-mint"><i class="bi bi-check2-circle me-1"></i> @(isEdit ? "Save changes" : "Add to menu")</button>
+            </div>
+        </div>
+
+        <!-- RIGHT: live preview -->
+        <aside class="preview-sticky" data-reveal data-reveal-delay="1">
+            <div class="small fw-bold text-muted-mm mb-2 text-uppercase" style="letter-spacing:.1em">Live preview</div>
+            <div class="mm-card item-card" id="pvCard">
+                <div class="item-media">
+                    <img id="pvImg" alt="" class="d-none" />
+                    <span class="item-emoji" id="pvEmoji">🍽️</span>
+                    <span class="item-cat-tag" id="pvCat">Category</span>
+                    <span class="item-sold">SOLD OUT</span>
+                </div>
+                <div class="item-body">
+                    <div class="d-flex justify-content-between gap-2">
+                        <div class="item-name" id="pvName">Dish name</div>
+                        <div class="item-price" id="pvPrice">Rs. 0</div>
+                    </div>
+                    <p class="item-desc" id="pvDesc">Your description will appear here.</p>
+                </div>
+            </div>
+            <p class="small text-muted-mm mt-2">This is how guests will see the dish on your public menu.</p>
+        </aside>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        (function () {
+            const $ = id => document.getElementById(id);
+            const nameI = $('Name'), catI = $('CategoryId'), priceI = $('Price'), descI = $('Description'),
+                  emojiI = $('Emoji'), availI = $('IsAvailable'), fileI = $('ImageFile'), removeI = $('removeImage'),
+                  dz = $('dz'), dzPrev = $('dzPreview'), dzImg = $('dzImg');
+            const pv = { card: $('pvCard'), img: $('pvImg'), emoji: $('pvEmoji'), cat: $('pvCat'),
+                         name: $('pvName'), price: $('pvPrice'), desc: $('pvDesc') };
+
+            let imgSrc = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.ExistingImagePath ?? ""));
+
+            function render() {
+                pv.name.textContent = nameI.value.trim() || 'Dish name';
+                pv.price.textContent = 'Rs. ' + (priceI.value ? Number(priceI.value).toLocaleString('en-PK') : '0');
+                pv.desc.textContent = descI.value.trim() || 'Your description will appear here.';
+                pv.cat.textContent = catI.value !== '0' ? catI.selectedOptions[0].text : 'Category';
+                pv.emoji.textContent = emojiI.value || '🍽️';
+                pv.img.src = imgSrc || '';
+                pv.img.classList.toggle('d-none', !imgSrc);
+                pv.emoji.classList.toggle('d-none', !!imgSrc);
+                pv.card.classList.toggle('off', !availI.checked);
+                $('descCount').textContent = descI.value.length + '/200';
+            }
+
+            function setImage(src) {
+                imgSrc = src || '';
+                dzImg.src = imgSrc;
+                dzPrev.style.display = imgSrc ? 'block' : 'none';
+                dz.style.display = imgSrc ? 'none' : 'block';
+                render();
+            }
+
+            function handleFile(file) {
+                if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+                    MM.toast('⚠️ Only JPG, PNG or WEBP images.'); fileI.value = ''; return;
+                }
+                if (file.size > 2 * 1024 * 1024) {
+                    MM.toast('⚠️ Image must be 2 MB or smaller.'); fileI.value = ''; return;
+                }
+                removeI.value = 'false';
+                const r = new FileReader();
+                r.onload = e => setImage(e.target.result);
+                r.readAsDataURL(file);
+            }
+
+            fileI.addEventListener('change', () => { if (fileI.files[0]) handleFile(fileI.files[0]); });
+            $('dzRemove').addEventListener('click', () => { fileI.value = ''; removeI.value = 'true'; setImage(''); });
+
+            ['dragenter', 'dragover'].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.classList.add('drag'); }));
+            ['dragleave', 'drop'].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.classList.remove('drag'); }));
+            dz.addEventListener('drop', e => {
+                if (e.dataTransfer.files.length) { fileI.files = e.dataTransfer.files; handleFile(e.dataTransfer.files[0]); }
+            });
+
+            // Emoji picker
+            function markEmoji() {
+                document.querySelectorAll('.emoji-btn').forEach(b => b.classList.toggle('active', b.dataset.emoji === emojiI.value));
+            }
+            $('emojiGrid').addEventListener('click', e => {
+                const b = e.target.closest('.emoji-btn'); if (!b) return;
+                emojiI.value = b.dataset.emoji; markEmoji(); render();
+            });
+
+            [nameI, catI, priceI, descI, availI].forEach(el => {
+                el.addEventListener('input', render);
+                el.addEventListener('change', render);
+            });
+
+            if (!emojiI.value) emojiI.value = '🍽️';
+            markEmoji();
+            setImage(imgSrc);
+        })();
+    </script>
+}

@@ -1,0 +1,84 @@
+﻿@model MenuMint.ViewModels.RegisterViewModel
+@{
+    Layout = "_AuthLayout";
+    ViewData["Title"] = "Create account";
+    ViewData["ArtTitle"] = "Let's put your menu online.";
+    ViewData["ArtText"] = "Register your restaurant, add your dishes, and get a QR code that works on every table, today.";
+}
+
+<div data-reveal>
+    <h1 class="h2 mb-1">Create your account</h1>
+    <p class="text-muted-mm mb-4">Takes less than a minute.</p>
+
+    <form asp-action="Register" method="post" novalidate>
+        <div asp-validation-summary="ModelOnly" class="mm-alert-error"></div>
+
+        <div class="row g-3">
+            <div class="col-sm-6">
+                <label asp-for="OwnerName" class="form-label"></label>
+                <div class="input-icon">
+                    <i class="bi bi-person"></i>
+                    <input asp-for="OwnerName" class="form-control" placeholder="Hifza Rasool" autocomplete="name" />
+                </div>
+                <span asp-validation-for="OwnerName" class="mm-field-error"></span>
+            </div>
+            <div class="col-sm-6">
+                <label asp-for="RestaurantName" class="form-label"></label>
+                <div class="input-icon">
+                    <i class="bi bi-shop"></i>
+                    <input asp-for="RestaurantName" class="form-control" placeholder="Saffron & Salt" id="restaurantName" />
+                </div>
+                <span asp-validation-for="RestaurantName" class="mm-field-error"></span>
+            </div>
+        </div>
+
+        <div class="slug-preview my-3" id="slugBox">
+            <i class="bi bi-link-45deg"></i>
+            <span>Your menu link:</span>
+            <code id="slugText">/m/your-restaurant</code>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Email" class="form-label">Email</label>
+            <div class="input-icon">
+                <i class="bi bi-envelope"></i>
+                <input asp-for="Email" class="form-control" placeholder="you@restaurant.com" autocomplete="email" />
+            </div>
+            <span asp-validation-for="Email" class="mm-field-error"></span>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Password" class="form-label">Password</label>
+            <div class="input-icon">
+                <i class="bi bi-lock"></i>
+                <input asp-for="Password" class="form-control" placeholder="At least 8 characters" autocomplete="new-password" id="pw" />
+                <button type="button" class="pw-toggle" data-toggle-password aria-label="Show password"><i class="bi bi-eye"></i></button>
+            </div>
+            <div class="strength mt-2" id="strength" data-level="0">
+                <span></span><span></span><span></span><span></span>
+                <small id="strengthLabel">Enter a password</small>
+            </div>
+            <span asp-validation-for="Password" class="mm-field-error"></span>
+        </div>
+
+        <div class="mb-4">
+            <label asp-for="ConfirmPassword" class="form-label"></label>
+            <div class="input-icon">
+                <i class="bi bi-shield-lock"></i>
+                <input asp-for="ConfirmPassword" class="form-control" placeholder="Repeat your password" autocomplete="new-password" />
+                <button type="button" class="pw-toggle" data-toggle-password aria-label="Show password"><i class="bi bi-eye"></i></button>
+            </div>
+            <span asp-validation-for="ConfirmPassword" class="mm-field-error"></span>
+        </div>
+
+        <button type="submit" class="btn btn-mint w-100 btn-lg">Create account</button>
+    </form>
+
+    <p class="text-center text-muted-mm mt-4 mb-0">
+        Already have an account? <a asp-action="Login" class="fw-bold">Log in</a>
+    </p>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

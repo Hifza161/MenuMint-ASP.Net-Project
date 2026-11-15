@@ -1,0 +1,11 @@
+﻿@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Menu not found";
+}
+
+<section class="container py-5 text-center" style="min-height:60vh">
+    <div class="display-1 mb-2">🍽️</div>
+    <h1 class="mb-2">@(ViewData["Heading"] ?? "Menu not found")</h1>
+    <p class="text-muted-mm mb-4">@(ViewData["Text"] ?? "We couldn't find the menu you're looking for.")</p>
+    <a asp-controller="Home" asp-action="Index" class="btn btn-mint">Back to home</a>
+</section>

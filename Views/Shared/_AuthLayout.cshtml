@@ -1,0 +1,60 @@
+﻿<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@ViewData["Title"] – MenuMint</title>
+
+    <script>
+        (function () { try { var t = localStorage.getItem('mm-theme'); if (t) document.documentElement.setAttribute('data-bs-theme', t); } catch (e) { } })();
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/lib/bootstrap-icons/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="icon" type="image/svg+xml" href="~/favicon.svg" />
+</head>
+<body>
+    <div class="auth-shell">
+        <aside class="auth-art">
+            <a asp-controller="Home" asp-action="Index" class="mm-brand text-white">
+                <span class="logo-dot" style="background:rgba(255,255,255,.2)"><i class="bi bi-qr-code-scan"></i></span>
+                MenuMint
+            </a>
+
+            <div class="auth-art-copy">
+                <h2 class="display-5">@ViewData["ArtTitle"]</h2>
+                <p class="opacity-75 fs-5">@ViewData["ArtText"]</p>
+            </div>
+
+            <div class="auth-art-foot">
+                <div><strong>1 QR</strong><span>forever</span></div>
+                <div><strong>24/7</strong><span>always fresh</span></div>
+                <div><strong>0</strong><span>reprints</span></div>
+            </div>
+
+        </aside>
+
+        <section class="auth-form-side">
+            <button class="theme-toggle auth-theme" id="themeToggle" type="button" aria-label="Toggle dark mode">
+                <i class="bi bi-moon-stars"></i>
+            </button>
+            <div class="auth-box">
+                <a asp-controller="Home" asp-action="Index" class="mm-brand d-lg-none mb-4">
+                    <span class="logo-dot"><i class="bi bi-qr-code-scan"></i></span>
+                    Menu<span class="mint">Mint</span>
+                </a>
+                @RenderBody()
+            </div>
+        </section>
+    </div>
+
+    <div class="mm-toast-wrap" id="toastWrap"></div>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/auth.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

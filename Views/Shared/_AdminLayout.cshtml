@@ -1,0 +1,87 @@
+﻿@{
+    var action = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
+    var adminName = ViewData["AdminName"] as string ?? "Admin";
+    var initial = adminName.Length > 0 ? adminName[0].ToString().ToUpper() : "A";
+    string Active(params string[] a) => a.Any(x => string.Equals(action, x, StringComparison.OrdinalIgnoreCase)) ? "active" : "";
+}
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href="~/favicon.svg" />
+    <title>@ViewData["Title"] – MenuMint Admin</title>
+    <script>
+        (function () { try { var t = localStorage.getItem('mm-theme'); if (t) document.documentElement.setAttribute('data-bs-theme', t); } catch (e) { } })();
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/lib/bootstrap-icons/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body>
+    <div class="dash-shell">
+        <div class="side-overlay" id="sideOverlay"></div>
+
+        <aside class="dash-side" id="dashSide">
+            <a asp-controller="Home" asp-action="Index" class="mm-brand mb-4">
+                <span class="logo-dot"><i class="bi bi-qr-code-scan"></i></span>
+                Menu<span class="mint">Mint</span>
+            </a>
+
+            <div class="side-rest admin-badge">
+                <div class="side-rest-icon"><i class="bi bi-shield-lock-fill"></i></div>
+                <div class="min-w-0">
+                    <div class="side-rest-name">Administrator</div>
+                    <div class="side-rest-sub">Platform control</div>
+                </div>
+            </div>
+
+            <nav class="side-nav">
+                <div class="side-label">Platform</div>
+                <a class="side-link @Active("Dashboard")" href="/Admin/Dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a>
+                <a class="side-link @Active("Restaurants")" href="/Admin/Restaurants"><i class="bi bi-shop-window"></i> Restaurants</a>
+
+                <div class="side-label">Shortcuts</div>
+                <a class="side-link" href="/" target="_blank"><i class="bi bi-house"></i> Visit website</a>
+            </nav>
+
+            <form asp-controller="Account" asp-action="Logout" method="post" class="mt-auto">
+                <button type="submit" class="side-link w-100 text-start border-0 bg-transparent"><i class="bi bi-box-arrow-left"></i> Log out</button>
+            </form>
+        </aside>
+
+        <div class="dash-main">
+            <header class="dash-top">
+                <button class="theme-toggle d-lg-none" id="sideToggle" type="button" aria-label="Open menu"><i class="bi bi-list fs-5"></i></button>
+                <div class="me-auto"><h1 class="dash-title">@ViewData["Title"]</h1></div>
+                <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle dark mode"><i class="bi bi-moon-stars"></i></button>
+                <div class="user-chip">
+                    <span class="avatar" style="background:var(--mm-mint-600)">@initial</span>
+                    <span class="d-none d-sm-inline">@adminName</span>
+                </div>
+            </header>
+
+            <div class="dash-content">
+                @RenderBody()
+            </div>
+        </div>
+    </div>
+
+    <div class="mm-toast-wrap" id="toastWrap"></div>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/owner.js" asp-append-version="true"></script>
+    @if (TempData["Success"] is string okMsg)
+    {
+        <script>MM.toast(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(okMsg)), 4000);</script>
+    }
+    @if (TempData["Error"] is string errMsg)
+    {
+        <script>MM.toast(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(errMsg)), 4000);</script>
+    }
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

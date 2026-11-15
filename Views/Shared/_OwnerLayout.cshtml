@@ -1,0 +1,98 @@
+﻿@{
+    var action = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
+    var ownerName = ViewData["OwnerName"] as string ?? "Owner";
+    var restaurant = ViewData["RestaurantName"] as string ?? "My Restaurant";
+    var slug = ViewData["Slug"] as string ?? "";
+    var initial = ownerName.Length > 0 ? ownerName[0].ToString().ToUpper() : "O";
+    string Active(params string[] a) => a.Any(x => string.Equals(action, x, StringComparison.OrdinalIgnoreCase)) ? "active" : "";
+}
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@ViewData["Title"] – MenuMint</title>
+    <script>
+        (function () { try { var t = localStorage.getItem('mm-theme'); if (t) document.documentElement.setAttribute('data-bs-theme', t); } catch (e) { } })();
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/lib/bootstrap-icons/font/bootstrap-icons.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="icon" type="image/svg+xml" href="~/favicon.svg" />
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body>
+    <div class="dash-shell">
+
+        <div class="side-overlay" id="sideOverlay"></div>
+
+        <aside class="dash-side" id="dashSide">
+            <a asp-controller="Home" asp-action="Index" class="mm-brand mb-4">
+                <span class="logo-dot"><i class="bi bi-qr-code-scan"></i></span>
+                Menu<span class="mint">Mint</span>
+            </a>
+
+            <div class="side-rest">
+                <div class="side-rest-icon"><i class="bi bi-shop"></i></div>
+                <div class="min-w-0">
+                    <div class="side-rest-name">@restaurant</div>
+                    <div class="side-rest-sub">Restaurant owner</div>
+                </div>
+            </div>
+
+            <nav class="side-nav">
+                <div class="side-label">Manage</div>
+                <a class="side-link @Active("Dashboard")" href="/Owner/Dashboard"><i class="bi bi-grid-1x2"></i> Dashboard</a>
+                <a class="side-link @Active("Categories")" href="/Owner/Categories"><i class="bi bi-tags"></i> Categories</a>
+                <a class="side-link @Active("Items", "ItemForm")" href="/Owner/Items"><i class="bi bi-egg-fried"></i> Menu items</a>
+
+                <div class="side-label">Share</div>
+                <a class="side-link @Active("Qr")" href="/Owner/Qr"><i class="bi bi-qr-code"></i> QR code</a>
+                <a class="side-link" href="/m/@slug" target="_blank"><i class="bi bi-box-arrow-up-right"></i> View public menu</a>
+
+                <div class="side-label">Settings</div>
+                <a class="side-link @Active("Profile")" href="/Owner/Profile"><i class="bi bi-person-gear"></i> Restaurant profile</a>
+            </nav>
+
+            <form asp-controller="Account" asp-action="Logout" method="post" class="mt-auto">
+                <button type="submit" class="side-link w-100 text-start border-0 bg-transparent"><i class="bi bi-box-arrow-left"></i> Log out</button>
+            </form>
+        </aside>
+
+        <div class="dash-main">
+            <header class="dash-top">
+                <button class="theme-toggle d-lg-none" id="sideToggle" type="button" aria-label="Open menu"><i class="bi bi-list fs-5"></i></button>
+                <div class="me-auto">
+                    <h1 class="dash-title">@ViewData["Title"]</h1>
+                </div>
+                <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle dark mode"><i class="bi bi-moon-stars"></i></button>
+                <div class="user-chip">
+                    <span class="avatar">@initial</span>
+                    <span class="d-none d-sm-inline">@ownerName</span>
+                </div>
+            </header>
+
+            <div class="dash-content">
+                @RenderBody()
+            </div>
+        </div>
+    </div>
+
+    <div class="mm-toast-wrap" id="toastWrap"></div>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/owner.js" asp-append-version="true"></script>
+    @if (TempData["Success"] is string okMsg)
+    {
+        <script>MM.toast(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(okMsg)));</script>
+    }
+    @if (TempData["Error"] is string errMsg)
+    {
+        <script>MM.toast(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(errMsg)), 4000);</script>
+    }
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

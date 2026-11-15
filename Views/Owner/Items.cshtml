@@ -1,0 +1,198 @@
+﻿@model MenuMint.ViewModels.ItemsPageViewModel
+@{
+    Layout = "_OwnerLayout";
+    ViewData["Title"] = "Menu items";
+}
+@Html.AntiForgeryToken()
+
+@{
+    var soldOut = Model.Items.Count(i => !i.IsAvailable);
+}
+
+@if (!Model.Categories.Any())
+{
+    <div class="mm-card empty-state" data-reveal>
+        <div class="empty-emoji">🗂️</div>
+        <h4>Create a category first</h4>
+        <p class="text-muted-mm">Dishes live inside categories like Starters or Desserts.</p>
+        <a asp-action="Categories" class="btn btn-mint">Go to categories</a>
+    </div>
+}
+else if (!Model.Items.Any())
+{
+    <div class="mm-card empty-state" data-reveal>
+        <div class="empty-emoji">🍽️</div>
+        <h4>Your menu is empty</h4>
+        <p class="text-muted-mm">Add your first dish and it will appear on your public menu.</p>
+        <a asp-action="ItemForm" class="btn btn-mint"><i class="bi bi-plus-lg me-1"></i> Add your first dish</a>
+    </div>
+}
+else
+{
+    <div class="items-bar" data-reveal>
+        <div class="search-box">
+            <i class="bi bi-search"></i>
+            <input id="itemSearch" class="form-control" placeholder="Search dishes" autocomplete="off" />
+        </div>
+
+        <div class="seg" id="statusChips">
+            <button type="button" class="chip active" data-status="all">All</button>
+            <button type="button" class="chip" data-status="1">Available</button>
+            <button type="button" class="chip" data-status="0">Sold out</button>
+        </div>
+
+        <a asp-action="ItemForm" class="btn btn-mint ms-auto"><i class="bi bi-plus-lg me-1"></i> Add item</a>
+    </div>
+
+    <div class="cat-tabs" id="catChips" data-reveal>
+        <button type="button" class="chip active" data-cat="all">All <small>@Model.Items.Count</small></button>
+        @foreach (var c in Model.Categories)
+        {
+            <button type="button" class="chip" data-cat="@c.CategoryId">@c.Name <small>@Model.Items.Count(i => i.CategoryId == c.CategoryId)</small></button>
+        }
+    </div>
+
+    <div class="result-count" id="resultCount"></div>
+
+    <div class="row g-3" id="itemGrid">
+        @foreach (var it in Model.Items)
+        {
+            <div class="col-sm-6 col-xl-4 item-col"
+                 data-name="@((it.Name + " " + it.Description).ToLower())"
+                 data-cat="@it.CategoryId"
+                 data-avail="@(it.IsAvailable ? "1" : "0")">
+                <div class="mm-card item-card @(it.IsAvailable ? "" : "off")">
+                    <div class="item-media">
+                        @if (!string.IsNullOrEmpty(it.ImagePath))
+                        {
+                            <img src="@it.ImagePath" alt="@it.Name" loading="lazy" />
+                        }
+                        else
+                        {
+                            <span class="item-emoji">@it.Emoji</span>
+                        }
+                        <span class="item-cat-tag">@it.CategoryName</span>
+                        <span class="item-sold">SOLD OUT</span>
+                    </div>
+                    <div class="item-body">
+                        <div class="d-flex justify-content-between gap-2">
+                            <div class="item-name">@it.Name</div>
+                            <div class="item-price">Rs. @it.Price.ToString("N0")</div>
+                        </div>
+                        <p class="item-desc">@(string.IsNullOrWhiteSpace(it.Description) ? "No description" : it.Description)</p>
+                        <div class="item-foot">
+                            <label class="avail">
+                                <div class="form-check form-switch m-0">
+                                    <input class="form-check-input avail-input" type="checkbox" role="switch" data-id="@it.MenuItemId" @(it.IsAvailable ? "checked" : "") />
+                                </div>
+                                <span class="avail-text">@(it.IsAvailable ? "Available" : "Sold out")</span>
+                            </label>
+                            <div class="d-flex gap-1">
+                                <a asp-action="ItemForm" asp-route-id="@it.MenuItemId" class="icon-btn" title="Edit"><i class="bi bi-pencil"></i></a>
+                                <button type="button" class="icon-btn danger" title="Delete" data-delete data-id="@it.MenuItemId" data-name="@it.Name"><i class="bi bi-trash3"></i></button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="mm-card empty-state d-none" id="noResults">
+        <div class="empty-emoji">🔍</div>
+        <h5>No dishes match your filters</h5>
+        <p class="text-muted-mm mb-0">Try a different search or category.</p>
+    </div>
+}
+
+<!-- Delete modal -->
+<div class="modal fade" id="delModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content text-center p-3">
+            <form asp-action="DeleteItem" method="post">
+                <input type="hidden" name="id" id="delId" />
+                <div class="display-5 mb-1">🗑️</div>
+                <h5 class="mb-1">Delete dish?</h5>
+                <p class="text-muted-mm mb-3"><strong id="delName"></strong> will be removed from your menu.</p>
+                <div class="d-flex gap-2 justify-content-center">
+                    <button type="button" class="btn btn-ghost" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        (function () {
+            const cols = [...document.querySelectorAll('.item-col')];
+            if (!cols.length) return;
+
+            const search = document.getElementById('itemSearch');
+            const noResults = document.getElementById('noResults');
+            const counter = document.getElementById('resultCount');
+            let cat = 'all', status = 'all', q = '';
+
+            function apply() {
+                let shown = 0;
+                cols.forEach(c => {
+                    const ok = (cat === 'all' || c.dataset.cat === cat)
+                            && (status === 'all' || c.dataset.avail === status)
+                            && c.dataset.name.includes(q);
+                    c.classList.toggle('d-none', !ok);
+                    if (ok) shown++;
+                });
+                noResults.classList.toggle('d-none', shown !== 0);
+                counter.textContent = shown === cols.length ? '' : `Showing ${shown} of ${cols.length} dishes`;
+            }
+
+            function chipGroup(id, key, set) {
+                const wrap = document.getElementById(id);
+                wrap.addEventListener('click', e => {
+                    const b = e.target.closest('.chip'); if (!b) return;
+                    wrap.querySelectorAll('.chip').forEach(x => x.classList.remove('active'));
+                    b.classList.add('active');
+                    set(b.dataset[key]); apply();
+                });
+            }
+            chipGroup('catChips', 'cat', v => cat = v);
+            chipGroup('statusChips', 'status', v => status = v);
+            search.addEventListener('input', () => { q = search.value.trim().toLowerCase(); apply(); });
+            apply();
+
+            // Availability switch (no page reload)
+            const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+            document.getElementById('itemGrid').addEventListener('change', async e => {
+                const input = e.target.closest('.avail-input'); if (!input) return;
+                const col = input.closest('.item-col');
+                try {
+                    const res = await fetch('@Url.Action("ToggleItem", "Owner")', {
+                        method: 'POST',
+                        headers: { 'RequestVerificationToken': token, 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: 'id=' + encodeURIComponent(input.dataset.id)
+                    });
+                    if (!res.ok) throw new Error();
+                    const data = await res.json();
+                    col.dataset.avail = data.available ? '1' : '0';
+                    col.querySelector('.item-card').classList.toggle('off', !data.available);
+                    col.querySelector('.avail-text').textContent = data.available ? 'Available' : 'Sold out';
+                    input.checked = data.available;
+                    MM.toast(`${data.name} is now ${data.available ? 'available ✅' : 'sold out 🚫'}`);
+                    apply();
+                } catch {
+                    input.checked = !input.checked;
+                    MM.toast('⚠️ Could not update. Please try again.');
+                }
+            });
+
+            // Delete modal
+            const delModal = new bootstrap.Modal(document.getElementById('delModal'));
+            document.querySelectorAll('[data-delete]').forEach(b => b.addEventListener('click', () => {
+                document.getElementById('delId').value = b.dataset.id;
+                document.getElementById('delName').textContent = b.dataset.name;
+                delModal.show();
+            }));
+        })();
+    </script>
+}

@@ -1,0 +1,173 @@
+﻿@model List<MenuMint.ViewModels.CategoryRowVm>
+@{
+    Layout = "_OwnerLayout";
+    ViewData["Title"] = "Categories";
+}
+
+<div class="page-head" data-reveal>
+    <p class="page-lead">Guests see your categories in this order. <strong>Reorder, rename or hide</strong> them anytime.</p>
+    <button type="button" class="btn btn-mint" data-add><i class="bi bi-plus-lg me-1"></i> Add category</button>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="mm-card empty-state" data-reveal>
+        <div class="empty-emoji">🗂️</div>
+        <h4>No categories yet</h4>
+        <p class="text-muted-mm">Start with something like Starters, Main Course, Desserts or Beverages.</p>
+        <button type="button" class="btn btn-mint" data-add><i class="bi bi-plus-lg me-1"></i> Create your first category</button>
+    </div>
+}
+else
+{
+    <div class="row g-3">
+        @for (int i = 0; i < Model.Count; i++)
+        {
+            var c = Model[i];
+            <div class="col-lg-6" data-reveal>
+                <div class="mm-card cat-card @(c.IsActive ? "" : "inactive")">
+                    <div class="cat-order">@(i + 1)</div>
+
+                    <div class="flex-grow-1 min-w-0">
+                        <div class="cat-name text-truncate">@c.Name</div>
+                        <div class="small text-muted-mm">
+                            @c.ItemCount item@(c.ItemCount == 1 ? "" : "s") · @(c.IsActive ? "Visible" : "Hidden") to guests
+                        </div>
+                    </div>
+
+                    <div class="cat-actions">
+                        <form asp-action="ToggleCategory" method="post" class="m-0" title="Show or hide">
+                            <input type="hidden" name="id" value="@c.CategoryId" />
+                            <div class="form-check form-switch m-0 me-1">
+                                <input class="form-check-input" type="checkbox" role="switch" @(c.IsActive ? "checked" : "") onchange="this.form.submit()" aria-label="Toggle visibility" />
+                            </div>
+                        </form>
+
+                        <form asp-action="MoveCategory" method="post" class="m-0">
+                            <input type="hidden" name="id" value="@c.CategoryId" />
+                            <input type="hidden" name="dir" value="up" />
+                            <button type="submit" class="icon-btn" title="Move up" @(i == 0 ? "disabled" : "")><i class="bi bi-arrow-up"></i></button>
+                        </form>
+                        <form asp-action="MoveCategory" method="post" class="m-0">
+                            <input type="hidden" name="id" value="@c.CategoryId" />
+                            <input type="hidden" name="dir" value="down" />
+                            <button type="submit" class="icon-btn" title="Move down" @(i == Model.Count - 1 ? "disabled" : "")><i class="bi bi-arrow-down"></i></button>
+                        </form>
+
+                        <button type="button" class="icon-btn" title="Rename" data-edit data-id="@c.CategoryId" data-name="@c.Name"><i class="bi bi-pencil"></i></button>
+                        <button type="button" class="icon-btn danger" title="Delete" data-delete data-id="@c.CategoryId" data-name="@c.Name" data-count="@c.ItemCount"><i class="bi bi-trash3"></i></button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+<!-- ===== Add / Edit modal ===== -->
+<div class="modal fade" id="catModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <form asp-action="SaveCategory" method="post" id="catForm" novalidate>
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title" id="catModalTitle">Add category</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="CategoryId" id="catId" value="0" />
+                    <label class="form-label" for="catName">Category name</label>
+                    <input class="form-control" name="Name" id="catName" maxlength="50" minlength="2" required placeholder="e.g. Desserts" autocomplete="off" />
+                    <div class="invalid-feedback">Please enter a name (2 to 50 characters).</div>
+
+                    <div class="small text-muted-mm mt-3 mb-2">Quick picks</div>
+                    <div class="quick-picks">
+                        <button type="button" class="chip" data-pick="Starters">Starters</button>
+                        <button type="button" class="chip" data-pick="Main Course">Main Course</button>
+                        <button type="button" class="chip" data-pick="Desserts">Desserts</button>
+                        <button type="button" class="chip" data-pick="Beverages">Beverages</button>
+                        <button type="button" class="chip" data-pick="Sides">Sides</button>
+                        <button type="button" class="chip" data-pick="Specials">Specials</button>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-ghost" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-mint" id="catSubmit">Add category</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- ===== Delete modal ===== -->
+<div class="modal fade" id="delModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm">
+        <div class="modal-content text-center p-3">
+            <form asp-action="DeleteCategory" method="post">
+                <input type="hidden" name="id" id="delId" />
+                <div class="display-5 mb-1">🗑️</div>
+                <h5 class="mb-1">Delete category?</h5>
+                <p class="text-muted-mm mb-2">You're about to delete <strong id="delName"></strong>.</p>
+                <p class="small text-danger fw-bold d-none" id="delWarn"></p>
+                <div class="d-flex gap-2 justify-content-center mt-3">
+                    <button type="button" class="btn btn-ghost" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger" id="delConfirm">Delete</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        (function () {
+            const catModal = new bootstrap.Modal(document.getElementById('catModal'));
+            const delModal = new bootstrap.Modal(document.getElementById('delModal'));
+            const form = document.getElementById('catForm');
+            const idInput = document.getElementById('catId');
+            const nameInput = document.getElementById('catName');
+            const title = document.getElementById('catModalTitle');
+            const submit = document.getElementById('catSubmit');
+
+            function openCat(id, name) {
+                form.classList.remove('was-validated');
+                idInput.value = id;
+                nameInput.value = name;
+                title.textContent = id ? 'Rename category' : 'Add category';
+                submit.textContent = id ? 'Save changes' : 'Add category';
+                catModal.show();
+            }
+            document.getElementById('catModal').addEventListener('shown.bs.modal', () => nameInput.focus());
+
+            document.querySelectorAll('[data-add]').forEach(b => b.addEventListener('click', () => openCat(0, '')));
+            document.querySelectorAll('[data-edit]').forEach(b =>
+                b.addEventListener('click', () => openCat(b.dataset.id, b.dataset.name)));
+            document.querySelectorAll('[data-pick]').forEach(b =>
+                b.addEventListener('click', () => { nameInput.value = b.dataset.pick; nameInput.focus(); }));
+
+            form.addEventListener('submit', e => {
+                nameInput.value = nameInput.value.trim();
+                if (!form.checkValidity()) {
+                    e.preventDefault();
+                    form.classList.add('was-validated');
+                }
+            });
+
+            // Delete flow
+            const warn = document.getElementById('delWarn');
+            const confirmBtn = document.getElementById('delConfirm');
+            document.querySelectorAll('[data-delete]').forEach(b => b.addEventListener('click', () => {
+                const count = +b.dataset.count;
+                document.getElementById('delId').value = b.dataset.id;
+                document.getElementById('delName').textContent = b.dataset.name;
+                if (count > 0) {
+                    warn.textContent = `It still has ${count} item${count === 1 ? '' : 's'}. Move or delete them first.`;
+                    warn.classList.remove('d-none');
+                    confirmBtn.disabled = true;
+                } else {
+                    warn.classList.add('d-none');
+                    confirmBtn.disabled = false;
+                }
+                delModal.show();
+            }));
+        })();
+    </script>
+}

@@ -1,0 +1,251 @@
+﻿@model MenuMint.ViewModels.PublicMenuViewModel
+@{
+    Layout = "_MenuLayout";
+    ViewData["Title"] = Model.Name;
+    var initial = Model.Name.Length > 0 ? Model.Name[0].ToString().ToUpper() : "M";
+    var total = Model.Sections.Sum(s => s.Items.Count);
+    string Inv(decimal d) => d.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture);
+}
+
+<div class="pm-wrap">
+
+    <header class="pm-hero@(string.IsNullOrEmpty(Model.CoverPath) ? "" : " has-cover")"
+            style="@(string.IsNullOrEmpty(Model.CoverPath) ? "" : $"--cover:url('{Model.CoverPath}')")">
+        <button class="theme-toggle pm-theme" id="themeToggle" type="button" aria-label="Toggle dark mode"><i class="bi bi-moon-stars"></i></button>
+        <span class="pm-pill"><span class="live-dot"></span> Live menu</span>
+        <div class="pm-logo">
+            @if (!string.IsNullOrEmpty(Model.LogoPath))
+            {
+                <img src="@Model.LogoPath" alt="@Model.Name logo" />
+            }
+            else
+            {
+                <span>@initial</span>
+            }
+        </div>
+        <h1 class="pm-name">@Model.Name</h1>
+        @if (!string.IsNullOrWhiteSpace(Model.Description))
+        {
+            <p class="pm-desc">@Model.Description</p>
+        }
+        <div class="pm-meta">
+            @if (!string.IsNullOrWhiteSpace(Model.Address))
+            {
+                <a href="@($"https://www.google.com/maps/search/?api=1&query={Uri.EscapeDataString(Model.Address)}")" target="_blank" rel="noopener"><i class="bi bi-geo-alt-fill"></i> @Model.Address</a>
+            }
+            @if (!string.IsNullOrWhiteSpace(Model.Phone))
+            {
+                <a href="@($"tel:{Model.Phone.Replace(" ", "")}")"><i class="bi bi-telephone-fill"></i> @Model.Phone</a>
+            }
+        </div>
+    </header>
+
+    @if (!Model.Sections.Any())
+    {
+        <main class="pm-main">
+            <div class="mm-card empty-state">
+                <div class="empty-emoji">🍳</div>
+                <h4>The menu is being prepared</h4>
+                <p class="text-muted-mm mb-0">Please check back in a little while.</p>
+            </div>
+        </main>
+    }
+    else
+    {
+        <div class="pm-sticky" id="pmSticky">
+            <div class="pm-search">
+                <i class="bi bi-search"></i>
+                <input id="pmSearch" class="form-control" type="search" placeholder="Search dishes…" autocomplete="off" />
+                <button type="button" class="pm-clear d-none" id="pmClear" aria-label="Clear search"><i class="bi bi-x-lg"></i></button>
+            </div>
+            <div class="pm-chips" id="pmChips">
+                @foreach (var s in Model.Sections)
+                {
+                    <button type="button" class="chip" data-target="cat-@s.CategoryId">@s.Name</button>
+                }
+            </div>
+        </div>
+
+        <main class="pm-main" id="pmMain">
+            <div class="pm-toolbar">
+                <span id="pmCount">@total dishes</span>
+                <label class="avail m-0">
+                    <div class="form-check form-switch m-0"><input class="form-check-input" type="checkbox" role="switch" id="hideSold" /></div>
+                    <span>Hide sold out</span>
+                </label>
+            </div>
+
+            @foreach (var s in Model.Sections)
+            {
+                <section class="pm-section" id="cat-@s.CategoryId" data-section>
+                    <h2 class="pm-sec-title">@s.Name <small>@s.Items.Count</small></h2>
+                    <div class="pm-list">
+                        @foreach (var it in s.Items)
+                        {
+                            <button type="button" class="pm-dish @(it.IsAvailable ? "" : "off")"
+                                    data-search="@((it.Name + " " + it.Description).ToLower())"
+                                    data-avail="@(it.IsAvailable ? "1" : "0")"
+                                    data-name="@it.Name"
+                                    data-desc="@it.Description"
+                                    data-price="@Inv(it.Price)"
+                                    data-emoji="@it.Emoji"
+                                    data-img="@it.ImagePath"
+                                    data-cat="@s.Name">
+                                <div class="pm-thumb">
+                                    @if (!string.IsNullOrEmpty(it.ImagePath))
+                                    {
+                                        <img src="@it.ImagePath" alt="" loading="lazy" />
+                                    }
+                                    else
+                                    {
+                                        <span>@it.Emoji</span>
+                                    }
+                                </div>
+                                <div class="pm-info">
+                                    <div class="pm-dname">@it.Name</div>
+                                    <div class="pm-ddesc">@(string.IsNullOrWhiteSpace(it.Description) ? "Tap for details" : it.Description)</div>
+                                </div>
+                                <div class="pm-price">
+                                    Rs. @it.Price.ToString("N0")
+                                    @if (!it.IsAvailable)
+                                    {
+                                        <span class="tag-sold">SOLD OUT</span>
+                                    }
+                                </div>
+                            </button>
+                        }
+                    </div>
+                </section>
+            }
+
+            <div class="mm-card empty-state d-none" id="pmEmpty">
+                <div class="empty-emoji">🔍</div>
+                <h5>No dishes found</h5>
+                <p class="text-muted-mm mb-0">Try another word, or turn off "Hide sold out".</p>
+            </div>
+        </main>
+    }
+
+    <footer class="pm-foot">
+        <div class="mb-2">Prices and availability update live ✨</div>
+        <a href="/" class="mm-brand pm-powered"><span class="logo-dot"><i class="bi bi-qr-code-scan"></i></span> Menu<span class="mint">Mint</span></a>
+    </footer>
+</div>
+
+<!-- Dish bottom sheet -->
+<div class="modal fade" id="dishSheet" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog sheet-dialog">
+        <div class="modal-content sheet-content">
+            <div class="sheet-media">
+                <img id="shImg" class="d-none" alt="" />
+                <span id="shEmoji">🍽️</span>
+                <button type="button" class="btn-close sheet-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="sheet-body">
+                <div class="d-flex justify-content-between align-items-start gap-3">
+                    <h3 class="sheet-name" id="shName"></h3>
+                    <div class="sheet-price" id="shPrice"></div>
+                </div>
+                <div class="d-flex flex-wrap gap-2 my-2">
+                    <span class="badge-soft" id="shCat"></span>
+                    <span class="badge-soft" id="shBadge"></span>
+                </div>
+                <p class="sheet-desc" id="shDesc"></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        (function () {
+            const main = document.getElementById('pmMain');
+            if (!main) return;
+
+            const $ = id => document.getElementById(id);
+            const dishes = [...document.querySelectorAll('.pm-dish')];
+            const sections = [...document.querySelectorAll('[data-section]')];
+            const chipsEl = $('pmChips');
+            const chips = [...chipsEl.querySelectorAll('.chip')];
+            const sticky = $('pmSticky'), search = $('pmSearch'), clear = $('pmClear'),
+                  hideSold = $('hideSold'), empty = $('pmEmpty'), count = $('pmCount');
+            let q = '', lock = false, spy;
+
+            /* sticky height -> used for scroll offsets */
+            const setH = () => document.documentElement.style.setProperty('--stick-h', sticky.offsetHeight + 'px');
+
+            /* ---------- Search + filter ---------- */
+            function apply() {
+                let shown = 0;
+                dishes.forEach(d => {
+                    const ok = d.dataset.search.includes(q) && !(hideSold.checked && d.dataset.avail === '0');
+                    d.classList.toggle('d-none', !ok);
+                    if (ok) shown++;
+                });
+                sections.forEach(s => {
+                    const any = !!s.querySelector('.pm-dish:not(.d-none)');
+                    s.classList.toggle('d-none', !any);
+                    chipsEl.querySelector(`[data-target="${s.id}"]`).classList.toggle('d-none', !any);
+                });
+                empty.classList.toggle('d-none', shown !== 0);
+                count.textContent = `${shown} dish${shown === 1 ? '' : 'es'}`;
+                clear.classList.toggle('d-none', !q);
+            }
+            search.addEventListener('input', () => { q = search.value.trim().toLowerCase(); apply(); });
+            clear.addEventListener('click', () => { search.value = ''; q = ''; apply(); search.focus(); });
+            hideSold.addEventListener('change', apply);
+
+            /* ---------- Chips + scroll-spy ---------- */
+            function setActive(id) {
+                chips.forEach(c => c.classList.toggle('active', c.dataset.target === id));
+                const c = chipsEl.querySelector('.chip.active');
+                if (c) chipsEl.scrollTo({ left: c.offsetLeft - (chipsEl.clientWidth - c.offsetWidth) / 2, behavior: 'smooth' });
+            }
+            chipsEl.addEventListener('click', e => {
+                const b = e.target.closest('.chip'); if (!b) return;
+                lock = true;
+                setActive(b.dataset.target);
+                document.getElementById(b.dataset.target).scrollIntoView({ behavior: 'smooth', block: 'start' });
+                setTimeout(() => lock = false, 800);
+            });
+
+            function observe() {
+                spy?.disconnect();
+                spy = new IntersectionObserver(entries => {
+                    if (lock) return;
+                    entries.forEach(en => { if (en.isIntersecting) setActive(en.target.id); });
+                }, { rootMargin: `-${sticky.offsetHeight + 12}px 0px -65% 0px` });
+                sections.forEach(s => spy.observe(s));
+            }
+
+            /* ---------- Dish bottom sheet ---------- */
+            const sheet = new bootstrap.Modal($('dishSheet'));
+            main.addEventListener('click', e => {
+                const d = e.target.closest('.pm-dish'); if (!d) return;
+                const m = d.dataset, soldOut = m.avail === '0';
+                $('shName').textContent = m.name;
+                $('shPrice').textContent = 'Rs. ' + Number(m.price).toLocaleString('en-PK');
+                $('shCat').textContent = m.cat;
+                $('shDesc').textContent = m.desc || 'No description added yet.';
+
+                const badge = $('shBadge');
+                badge.textContent = soldOut ? 'Sold out' : 'Available';
+                badge.className = soldOut ? 'badge-off' : 'badge-soft';
+
+                const img = $('shImg'), emoji = $('shEmoji');
+                if (m.img) { img.src = m.img; img.alt = m.name; } else { img.removeAttribute('src'); }
+                img.classList.toggle('d-none', !m.img);
+                emoji.classList.toggle('d-none', !!m.img);
+                emoji.textContent = m.emoji;
+                $('dishSheet').classList.toggle('sold', soldOut);
+                sheet.show();
+            });
+
+            /* ---------- Init ---------- */
+            setH(); observe(); apply();
+            setActive(sections[0].id);
+            window.addEventListener('resize', () => { setH(); observe(); });
+            window.addEventListener('load', () => { setH(); observe(); });
+        })();
+    </script>
+}

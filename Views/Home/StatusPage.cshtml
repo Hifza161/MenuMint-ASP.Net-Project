@@ -1,0 +1,24 @@
+﻿@model int
+@{
+    var (emoji, title, text) = Model switch
+    {
+        404 => ("🍽️", "This page isn't on the menu", "The link may be broken, or the page may have moved. Let's get you back to something tasty."),
+        403 => ("🔒", "You can't access this page", "Your account doesn't have permission to view it."),
+        500 => ("🔥", "The kitchen is on fire", "Something went wrong on our side. Please try again in a moment."),
+        _ => ("🤔", "Something unexpected happened", "Please go back and try again.")
+    };
+    ViewData["Title"] = title;
+}
+
+<section class="status-wrap">
+    <div>
+        <div class="status-emoji">@emoji</div>
+        <div class="status-code">@Model</div>
+        <h1 class="h2 mt-2">@title</h1>
+        <p class="text-muted-mm mx-auto" style="max-width:460px">@text</p>
+        <div class="d-flex flex-wrap gap-2 justify-content-center mt-4">
+            <a asp-controller="Home" asp-action="Index" class="btn btn-mint"><i class="bi bi-house me-1"></i> Back to home</a>
+            <button type="button" class="btn btn-ghost" onclick="history.back()"><i class="bi bi-arrow-left me-1"></i> Go back</button>
+        </div>
+    </div>
+</section>

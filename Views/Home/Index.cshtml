@@ -1,0 +1,237 @@
+﻿@{
+    ViewData["Title"] = "Digital menus, instantly updated";
+}
+
+<!-- ================= HERO ================= -->
+<section class="hero">
+    <div class="container">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-6">
+                <span class="badge-soft" data-reveal><i class="bi bi-stars"></i> No app. No printing. No waiting.</span>
+                <h1 class="hero-title mt-3" data-reveal data-reveal-delay="1">
+                    Your menu, one <span class="scribble">scan</span> away.
+                </h1>
+                <p class="lead text-muted-mm mt-3" data-reveal data-reveal-delay="2">
+                    MenuMint turns your restaurant menu into a beautiful, always-fresh web page.
+                    Change a price in seconds and your existing QR code shows it instantly.
+                </p>
+                <div class="d-flex flex-wrap gap-2 mt-4" data-reveal data-reveal-delay="3">
+                    <a href="/Account/Register" class="btn btn-mint btn-lg">Create my menu <i class="bi bi-arrow-right ms-1"></i></a>
+                    <a href="#demo" class="btn btn-ghost btn-lg"><i class="bi bi-play-circle me-1"></i> Try live demo</a>
+                </div>
+                <div class="d-flex gap-4 mt-5" data-reveal data-reveal-delay="3">
+                    <div class="hero-stat"><strong>1 QR</strong><span>works forever</span></div>
+                    <div class="hero-stat"><strong>0 Rs.</strong><span>reprinting cost</span></div>
+                    <div class="hero-stat"><strong>&lt;5 s</strong><span>to update a price</span></div>
+                </div>
+            </div>
+
+            <div class="col-lg-6" data-reveal data-reveal-delay="2">
+                <div class="phone-wrap">
+                    <div class="float-card fc-1"><i class="bi bi-qr-code-scan"></i> QR scanned</div>
+                    <div class="float-card fc-2"><i class="bi bi-lightning-charge-fill"></i> Price updated live</div>
+                    <div class="phone">
+                        <div class="phone-head">
+                            <small>Welcome to</small>
+                            <h6>Saffron &amp; Salt 🌿</h6>
+                        </div>
+                        <div class="phone-body">
+                            <div class="dish"><div class="thumb"><img src="~/images/dishes/margherita-pizza.jpg" alt="" /></div><div><div class="dish-name">Margherita</div><div class="dish-desc">Fresh basil, mozzarella</div></div><div class="dish-price">Rs. 1,450</div></div>
+                            <div class="dish"><div class="thumb"><img src="~/images/dishes/smash-burger.jpg" alt="" /></div><div><div class="dish-name">Smash Burger</div><div class="dish-desc">Double patty, house sauce</div></div><div class="dish-price">Rs. 1,250</div></div>
+                            <div class="dish"><div class="thumb"><img src="~/images/dishes/lava-cake.jpg" alt="" /></div><div><div class="dish-name">Lava Cake</div><div class="dish-desc">Warm chocolate center</div></div><div class="dish-price">Rs. 750</div></div>
+                            <div class="dish off"><div class="thumb"><img src="~/images/dishes/alfredo-pasta.jpg" alt="" /></div><div><div class="dish-name">Alfredo Pasta</div><div class="dish-desc">Creamy parmesan</div></div><div class="dish-price">Rs. 1,350<span class="tag-sold">SOLD OUT</span></div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ================= HOW IT WORKS ================= -->
+<section class="section" id="how">
+    <div class="container">
+        <div class="text-center mb-5" data-reveal>
+            <div class="section-eyebrow">How it works</div>
+            <h2 class="display-6 mt-2">Three steps. Zero reprints.</h2>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-4" data-reveal>
+                <div class="mm-card step-card hover-lift">
+                    <div class="step-num">01</div>
+                    <h4 class="mt-2">Build your menu</h4>
+                    <p class="text-muted-mm mb-0">Add categories, dishes, photos and prices from a clean owner dashboard.</p>
+                </div>
+            </div>
+            <div class="col-md-4" data-reveal data-reveal-delay="1">
+                <div class="mm-card step-card hover-lift">
+                    <div class="step-num">02</div>
+                    <h4 class="mt-2">Get your QR code</h4>
+                    <p class="text-muted-mm mb-0">One unique QR is generated for your restaurant. Print it once, stick it on every table.</p>
+                </div>
+            </div>
+            <div class="col-md-4" data-reveal data-reveal-delay="2">
+                <div class="mm-card step-card hover-lift">
+                    <div class="step-num">03</div>
+                    <h4 class="mt-2">Update anytime</h4>
+                    <p class="text-muted-mm mb-0">Change a price or mark an item sold out. Guests see it on the very next scan.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ================= SCAN PHOTO ================= -->
+<section class="section pt-0">
+    <div class="container">
+        <div class="scan-band" data-reveal>
+            <div class="scan-copy">
+                <h2 class="display-6">Point the camera.<br />The menu opens.</h2>
+                <p>No app and no sign-up. Guests scan the code on the table and see today's prices and what's sold out.</p>
+                <a href="/m/@MenuMint.Data.DemoStore.Restaurant.Slug" target="_blank" class="btn btn-mint">Open a live menu</a>
+            </div>
+            <img class="scan-photo" src="~/images/scenes/table-scan.jpg" alt="A guest scanning a QR code on a restaurant table" loading="lazy" />
+        </div>
+    </div>
+</section>
+
+<!-- ================= FEATURES ================= -->
+<section class="section" id="features" style="background: var(--mm-mint-50);">
+    <div class="container">
+        <div class="text-center mb-5" data-reveal>
+            <div class="section-eyebrow">Features</div>
+            <h2 class="display-6 mt-2">Everything a modern restaurant needs</h2>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-4" data-reveal><div class="mm-card feature-card hover-lift"><div class="feature-icon"><i class="bi bi-qr-code"></i></div><h5>Permanent QR code</h5><p class="text-muted-mm mb-0">The QR points to a stable URL, so menu changes never need a new code.</p></div></div>
+            <div class="col-md-6 col-lg-4" data-reveal data-reveal-delay="1"><div class="mm-card feature-card hover-lift"><div class="feature-icon coral"><i class="bi bi-phone"></i></div><h5>Mobile-first menu</h5><p class="text-muted-mm mb-0">Fast, thumb-friendly pages that need no login and no app install.</p></div></div>
+            <div class="col-md-6 col-lg-4" data-reveal data-reveal-delay="2"><div class="mm-card feature-card hover-lift"><div class="feature-icon butter"><i class="bi bi-search"></i></div><h5>Search and filter</h5><p class="text-muted-mm mb-0">Guests find dishes instantly by name or jump between categories.</p></div></div>
+            <div class="col-md-6 col-lg-4" data-reveal><div class="mm-card feature-card hover-lift"><div class="feature-icon"><i class="bi bi-toggles"></i></div><h5>Live availability</h5><p class="text-muted-mm mb-0">Mark items sold out with one switch. No more disappointed customers.</p></div></div>
+            <div class="col-md-6 col-lg-4" data-reveal data-reveal-delay="1"><div class="mm-card feature-card hover-lift"><div class="feature-icon coral"><i class="bi bi-shop"></i></div><h5>Multi-restaurant</h5><p class="text-muted-mm mb-0">Every owner gets an independent, private workspace and public page.</p></div></div>
+            <div class="col-md-6 col-lg-4" data-reveal data-reveal-delay="2"><div class="mm-card feature-card hover-lift"><div class="feature-icon butter"><i class="bi bi-shield-check"></i></div><h5>Role-based access</h5><p class="text-muted-mm mb-0">Secure logins for owners and a dedicated admin dashboard for the platform.</p></div></div>
+        </div>
+    </div>
+</section>
+
+<!-- ================= LIVE DEMO ================= -->
+<section class="section" id="demo">
+    <div class="container">
+        <div class="text-center mb-5" data-reveal>
+            <div class="section-eyebrow">Live demo</div>
+            <h2 class="display-6 mt-2">Flip a switch. Watch the menu change.</h2>
+            <p class="text-muted-mm">Edit the owner panel on the left. The customer's phone updates instantly.</p>
+            <a href="/m/@MenuMint.Data.DemoStore.Restaurant.Slug" target="_blank" class="btn btn-soft btn-sm mt-1">
+                <i class="bi bi-box-arrow-up-right me-1"></i> Open a real menu page
+            </a>
+        </div>
+        <div class="row g-5 align-items-center justify-content-center">
+            <div class="col-lg-5" data-reveal>
+                <div class="mm-card owner-panel">
+                    <div class="d-flex align-items-center gap-2 mb-2">
+                        <i class="bi bi-person-gear text-mint fs-5"></i><h5 class="m-0">Owner panel</h5>
+                    </div>
+                    <div id="ownerList"></div>
+                </div>
+            </div>
+            <div class="col-lg-5" data-reveal data-reveal-delay="1">
+                <div class="phone">
+                    <div class="phone-head">
+                        <small>Welcome to</small>
+                        <h6>Saffron &amp; Salt 🌿</h6>
+                        <div class="phone-search"><i class="bi bi-search"></i><input id="demoSearch" placeholder="Search dishes..."></div>
+                    </div>
+                    <div class="chip-row" id="demoChips"></div>
+                    <div class="phone-body" id="demoDishes"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ================= CTA ================= -->
+<section class="section pt-0">
+    <div class="container">
+        <div class="cta-band" data-reveal>
+            <h2 class="display-6">Ready to retire the printed menu?</h2>
+            <p class="opacity-75 mb-4">Create your restaurant's digital menu in minutes.</p>
+            <a href="/Account/Register" class="btn btn-light btn-lg">Get started free</a>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        (function () {
+                  const P = '/images/dishes/';
+        const items = [
+          { n: 'Bruschetta',     d: 'Tomato, basil, olive oil',  p: 650,  c: 'Starters', e: '🥖', a: true, img: P + 'bruschetta.jpg' },
+          { n: 'Crispy Wings',   d: 'Smoky BBQ glaze',           p: 850,  c: 'Starters', e: '🍗', a: true, img: P + 'crispy-wings.jpg' },
+          { n: 'Margherita',     d: 'Fresh basil, mozzarella',   p: 1450, c: 'Mains',    e: '🍕', a: true, img: P + 'margherita-pizza.jpg' },
+          { n: 'Smash Burger',   d: 'Double patty, house sauce', p: 1250, c: 'Mains',    e: '🍔', a: true, img: P + 'smash-burger.jpg' },
+          { n: 'Lava Cake',      d: 'Warm chocolate center',     p: 750,  c: 'Desserts', e: '🍰', a: true, img: P + 'lava-cake.jpg' },
+          { n: 'Mango Kulfi',    d: 'Pistachio topping',         p: 450,  c: 'Desserts', e: '🍨', a: true, img: P + 'mango-kulfi.jpg' },
+          { n: 'Mint Margarita', d: 'Fresh mint, lime, soda',    p: 550,  c: 'Drinks',   e: '🍹', a: true, img: P + 'mint-margarita.jpg' },
+          { n: 'Cold Coffee',    d: 'Iced, creamy, bold',        p: 600,  c: 'Drinks',   e: '☕', a: true, img: P + 'cold-coffee.jpg' }
+        ];
+          const cats = ['All', ...new Set(items.map(i => i.c))];
+          let activeCat = 'All', query = '';
+
+          const ownerList = document.getElementById('ownerList');
+          const chips = document.getElementById('demoChips');
+          const dishes = document.getElementById('demoDishes');
+          const search = document.getElementById('demoSearch');
+          const fmt = n => 'Rs. ' + Number(n).toLocaleString('en-PK');
+
+          // Owner panel (rendered once)
+          items.forEach((it, i) => {
+            const row = document.createElement('div');
+            row.className = 'owner-row';
+            row.innerHTML = `
+              <span class="em"><img src="${it.img}" alt=""></span>
+              <span class="nm">${it.n}</span>
+              <input type="number" class="form-control form-control-sm" min="0" step="50" value="${it.p}" data-i="${i}">
+              <div class="form-check form-switch m-0">
+                <input class="form-check-input" type="checkbox" role="switch" checked data-i="${i}">
+              </div>`;
+            ownerList.appendChild(row);
+          });
+          ownerList.addEventListener('input', e => {
+            const i = e.target.dataset.i; if (i === undefined) return;
+            if (e.target.type === 'number') items[i].p = Math.max(0, +e.target.value || 0);
+            renderDishes();
+          });
+          ownerList.addEventListener('change', e => {
+            const i = e.target.dataset.i;
+            if (i === undefined || e.target.type !== 'checkbox') return;
+            items[i].a = e.target.checked;
+            renderDishes();
+            MM.toast(`${items[i].n} is now ${items[i].a ? 'available' : 'sold out'}`);
+          });
+
+          // Phone: chips + dishes
+          function renderChips() {
+            chips.innerHTML = cats.map(c => `<button class="chip ${c === activeCat ? 'active' : ''}" data-c="${c}">${c}</button>`).join('');
+          }
+          chips.addEventListener('click', e => {
+            const c = e.target.dataset.c; if (!c) return;
+            activeCat = c; renderChips(); renderDishes();
+          });
+          search.addEventListener('input', () => { query = search.value.trim().toLowerCase(); renderDishes(); });
+
+          function renderDishes() {
+            const list = items.filter(i =>
+              (activeCat === 'All' || i.c === activeCat) &&
+              (i.n + ' ' + i.d).toLowerCase().includes(query));
+            dishes.innerHTML = list.length ? list.map(i => `
+              <div class="dish ${i.a ? '' : 'off'}">
+                <div class="thumb"><img src="${i.img}" alt="" loading="lazy"></div>
+                <div><div class="dish-name">${i.n}</div><div class="dish-desc">${i.d}</div></div>
+                <div class="dish-price">${fmt(i.p)}${i.a ? '' : '<span class="tag-sold">SOLD OUT</span>'}</div>
+              </div>`).join('')
+              : '<div class="text-center text-muted-mm small py-5">No dishes found 🍽️</div>';
+          }
+
+          renderChips(); renderDishes();
+        })();
+    </script>
+}

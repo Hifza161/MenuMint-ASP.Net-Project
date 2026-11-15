@@ -1,6 +1,7 @@
 using MenuMint.Data;
 using MenuMint.Data.Repositories;
 using MenuMint.Interfaces;
+using MenuMint.Services;
 using MenuMint.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -20,6 +21,12 @@ builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IMenuItemRepository, MenuItemRepository>();
 builder.Services.AddScoped<IPublicMenuRepository, PublicMenuRepository>();
 builder.Services.AddScoped<IAdminRepository, AdminRepository>();
+
+builder.Services.AddHttpContextAccessor();   // lets a service see the current user
+builder.Services.AddScoped<ISlugService, SlugService>();
+builder.Services.AddScoped<IImageStorageService, ImageStorageService>();
+builder.Services.AddScoped<ICurrentRestaurantService, CurrentRestaurantService>();
+builder.Services.AddScoped<IRestaurantSetupService, RestaurantSetupService>();
 
 // ASP.NET Core Identity: users + roles
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>

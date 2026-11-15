@@ -1,4 +1,5 @@
-﻿using MenuMint.Models;
+﻿using MenuMint.Interfaces;
+using MenuMint.Models;
 using MenuMint.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -10,12 +11,18 @@ public class AccountController : Controller
 {
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly SignInManager<ApplicationUser> _signInManager;
+    private readonly IRestaurantSetupService _restaurantSetup;
+    private readonly ILogger<AccountController> _logger;
 
     public AccountController(UserManager<ApplicationUser> userManager,
-                             SignInManager<ApplicationUser> signInManager)
+                             SignInManager<ApplicationUser> signInManager,
+                             IRestaurantSetupService restaurantSetup,
+                             ILogger<AccountController> logger)
     {
         _userManager = userManager;
         _signInManager = signInManager;
+        _restaurantSetup = restaurantSetup;
+        _logger = logger;
     }
 
     // ---------- LOGIN ----------
@@ -84,7 +91,7 @@ public class AccountController : Controller
         {
             UserName = model.Email,
             Email = model.Email,
-            FullName = model.OwnerName,
+            FullName = model.OwnerName.Trim(),
             EmailConfirmed = true,
             IsActive = true
         };
@@ -97,10 +104,27 @@ public class AccountController : Controller
             return View(model);
         }
 
-        await _userManager.AddToRoleAsync(user, "Owner");
+        // The user exists now. The role and the restaurant must succeed too, or we undo the user.
+        try
+        {
+            var roleResult = await _userManager.AddToRoleAsync(user, "Owner");
+            if (!roleResult.Succeeded)
+                throw new InvalidOperationException(
+                    "Could not assign the Owner role: " + string.Join("; ", roleResult.Errors.Select(e => e.Description)));
 
-        // TODO (ADO.NET step): INSERT a Restaurant row using
-        //   OwnerUserId = user.Id, Name = model.RestaurantName, Slug = generated slug
+            await _restaurantSetup.CreateForOwnerAsync(user.Id, model.RestaurantName);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Registration failed after the user {Email} was created. Removing the user again.", model.Email);
+
+            var undo = await _userManager.DeleteAsync(user);
+            if (!undo.Succeeded)
+                _logger.LogError("Could not remove the half-created user {Email}.", model.Email);
+
+            ModelState.AddModelError(string.Empty, "We couldn't finish creating your account. Please try again.");
+            return View(model);
+        }
 
         TempData["Success"] = "Account created! Please log in.";
         return RedirectToAction(nameof(Login));

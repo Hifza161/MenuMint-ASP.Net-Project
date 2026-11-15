@@ -1,0 +1,41 @@
+﻿@model MenuMint.ViewModels.SetupViewModel
+@{
+    Layout = "_AuthLayout";
+    ViewData["Title"] = "Set up your restaurant";
+    ViewData["ArtTitle"] = "One last step.";
+    ViewData["ArtText"] = "Tell us your restaurant's name and we'll create its menu page and QR link.";
+}
+
+<div>
+    <h1 class="h2 mb-1">Set up your restaurant</h1>
+    <p class="text-muted-mm mb-4">Your account is ready. It just needs a restaurant.</p>
+
+    <form asp-action="Setup" method="post" novalidate>
+        <div asp-validation-summary="ModelOnly" class="mm-alert-error"></div>
+
+        <div class="mb-3">
+            <label asp-for="RestaurantName" class="form-label"></label>
+            <div class="input-icon">
+                <i class="bi bi-shop"></i>
+                <input asp-for="RestaurantName" class="form-control" placeholder="Saffron & Salt" id="restaurantName" autocomplete="off" />
+            </div>
+            <span asp-validation-for="RestaurantName" class="mm-field-error"></span>
+        </div>
+
+        <div class="slug-preview mb-4">
+            <i class="bi bi-link-45deg"></i>
+            <span>Your menu link:</span>
+            <code id="slugText">/m/your-restaurant</code>
+        </div>
+
+        <button type="submit" class="btn btn-mint w-100 btn-lg">Create my restaurant</button>
+    </form>
+
+    <form asp-controller="Account" asp-action="Logout" method="post" class="text-center mt-3">
+        <button type="submit" class="btn btn-link text-muted-mm">Log out</button>
+    </form>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

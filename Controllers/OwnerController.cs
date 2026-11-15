@@ -1,4 +1,5 @@
 ﻿using MenuMint.Data;
+using MenuMint.Interfaces;
 using MenuMint.Models;
 using MenuMint.ViewModels;
 using Microsoft.AspNetCore.Authorization;
@@ -14,23 +15,58 @@ public class OwnerController : Controller
 {
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly IWebHostEnvironment _env;
+    private readonly ICurrentRestaurantService _current;
+    private readonly IRestaurantSetupService _setup;
 
-    public OwnerController(UserManager<ApplicationUser> userManager, IWebHostEnvironment env)
+    public OwnerController(UserManager<ApplicationUser> userManager, IWebHostEnvironment env,
+        ICurrentRestaurantService current, IRestaurantSetupService setup)
     {
         _userManager = userManager;
         _env = env;
+        _current = current;
+        _setup = setup;
     }
 
     public override async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
     {
+        // An owner without a restaurant can only reach the Setup page
+        var action = context.RouteData.Values["action"]?.ToString();
+        if (!string.Equals(action, nameof(Setup), StringComparison.OrdinalIgnoreCase)
+            && await _current.GetIdAsync() is null)
+        {
+            context.Result = RedirectToAction(nameof(Setup));
+            return;
+        }
+
         var user = await _userManager.GetUserAsync(User);
         ViewData["OwnerName"] = user?.FullName ?? "Owner";
 
-        // TODO (ADO.NET step): load the real restaurant for this user
+        // TODO (Phase 5): read these from the real restaurant. Until then the owner pages show the demo restaurant.
         ViewData["RestaurantName"] = DemoStore.Restaurant.Name;
         ViewData["Slug"] = DemoStore.Restaurant.Slug;
 
         await next();
+    }
+
+    // ---------- SETUP (owner has an account but no restaurant yet) ----------
+    [HttpGet]
+    public async Task<IActionResult> Setup()
+    {
+        if (await _current.GetIdAsync() is not null) return RedirectToAction(nameof(Dashboard));
+        return View(new SetupViewModel());
+    }
+
+    [HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> Setup(SetupViewModel model)
+    {
+        if (await _current.GetIdAsync() is not null) return RedirectToAction(nameof(Dashboard));
+        if (!ModelState.IsValid) return View(model);
+
+        await _setup.CreateForOwnerAsync(_current.UserId!, model.RestaurantName);
+        _current.Invalidate();
+
+        TempData["Success"] = "🎉 Your restaurant is ready.";
+        return RedirectToAction(nameof(Dashboard));
     }
 
     // ---------- DASHBOARD ----------

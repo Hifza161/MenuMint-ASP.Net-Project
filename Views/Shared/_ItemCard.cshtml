@@ -1,0 +1,40 @@
+﻿@using MenuMint.ViewModels
+@model ItemCardVm
+<div class="col-sm-6 col-xl-4 item-col"
+     data-name="@((Model.Name + " " + Model.Description).ToLower())"
+     data-cat="@Model.CategoryId"
+     data-avail="@(Model.IsAvailable ? "1" : "0")">
+    <div class="mm-card item-card @(Model.IsAvailable ? "" : "off")">
+        <div class="item-media">
+            @if (!string.IsNullOrEmpty(Model.ImagePath))
+            {
+                <img src="@Model.ImagePath" alt="@Model.Name" loading="lazy" />
+            }
+            else
+            {
+                <span class="item-emoji">@Model.Emoji</span>
+            }
+            <span class="item-cat-tag">@Model.CategoryName</span>
+            <span class="item-sold">SOLD OUT</span>
+        </div>
+        <div class="item-body">
+            <div class="d-flex justify-content-between gap-2">
+                <div class="item-name">@Model.Name</div>
+                <div class="item-price">Rs. @Model.Price.ToString("N0")</div>
+            </div>
+            <p class="item-desc">@(string.IsNullOrWhiteSpace(Model.Description) ? "No description" : Model.Description)</p>
+            <div class="item-foot">
+                <label class="avail">
+                    <div class="form-check form-switch m-0">
+                        <input class="form-check-input avail-input" type="checkbox" role="switch" data-id="@Model.MenuItemId" @(Model.IsAvailable ? "checked" : "") />
+                    </div>
+                    <span class="avail-text">@(Model.IsAvailable ? "Available" : "Sold out")</span>
+                </label>
+                <div class="d-flex gap-1">
+                    <a asp-action="ItemForm" asp-route-id="@Model.MenuItemId" class="icon-btn" title="Edit"><i class="bi bi-pencil"></i></a>
+                    <button type="button" class="icon-btn danger" title="Delete" data-delete data-id="@Model.MenuItemId" data-name="@Model.Name"><i class="bi bi-trash3"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,40 @@
+﻿@using MenuMint.ViewModels
+@model CategoryCardVm
+@{
+    var c = Model.Row;
+}
+<div class="col-lg-6" data-reveal>
+    <div class="mm-card cat-card @(c.IsActive ? "" : "inactive")">
+        <div class="cat-order">@Model.Position</div>
+
+        <div class="flex-grow-1 min-w-0">
+            <div class="cat-name text-truncate">@c.Name</div>
+            <div class="small text-muted-mm">
+                @c.ItemCount item@(c.ItemCount == 1 ? "" : "s") · @(c.IsActive ? "Visible" : "Hidden") to guests
+            </div>
+        </div>
+
+        <div class="cat-actions">
+            <form asp-action="ToggleCategory" method="post" class="m-0" title="Show or hide">
+                <input type="hidden" name="id" value="@c.CategoryId" />
+                <div class="form-check form-switch m-0 me-1">
+                    <input class="form-check-input" type="checkbox" role="switch" @(c.IsActive ? "checked" : "") onchange="this.form.submit()" aria-label="Toggle visibility" />
+                </div>
+            </form>
+
+            <form asp-action="MoveCategory" method="post" class="m-0">
+                <input type="hidden" name="id" value="@c.CategoryId" />
+                <input type="hidden" name="dir" value="up" />
+                <button type="submit" class="icon-btn" title="Move up" @(Model.Position == 1 ? "disabled" : "")><i class="bi bi-arrow-up"></i></button>
+            </form>
+            <form asp-action="MoveCategory" method="post" class="m-0">
+                <input type="hidden" name="id" value="@c.CategoryId" />
+                <input type="hidden" name="dir" value="down" />
+                <button type="submit" class="icon-btn" title="Move down" @(Model.Position == Model.Total ? "disabled" : "")><i class="bi bi-arrow-down"></i></button>
+            </form>
+
+            <button type="button" class="icon-btn" title="Rename" data-edit data-id="@c.CategoryId" data-name="@c.Name"><i class="bi bi-pencil"></i></button>
+            <button type="button" class="icon-btn danger" title="Delete" data-delete data-id="@c.CategoryId" data-name="@c.Name" data-count="@c.ItemCount"><i class="bi bi-trash3"></i></button>
+        </div>
+    </div>
+</div>

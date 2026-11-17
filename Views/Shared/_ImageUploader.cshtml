@@ -1,0 +1,30 @@
+﻿@using MenuMint.ViewModels
+@model ImageUploaderVm
+<div class="uploader" id="@(Model.Name)Uploader" data-uploader data-max-mb="@Model.MaxMb" data-existing="@Model.ExistingPath">
+    <label class="form-label">
+        @Model.Label
+        @if (!string.IsNullOrEmpty(Model.Note))
+        {
+            <span class="text-muted-mm fw-normal">@Model.Note</span>
+        }
+    </label>
+
+    <label for="@Model.Name" class="dropzone" data-dz>
+        <i class="bi @Model.Icon"></i>
+        <div class="fw-bold mt-1">@Model.Prompt</div>
+        <div class="small text-muted-mm">@Model.Hint</div>
+    </label>
+
+    <div class="dz-preview" data-preview style="height:@(Model.PreviewHeight)px">
+        <img data-img alt="" style="object-fit:@Model.Fit" />
+        <button type="button" class="btn btn-light btn-sm dz-remove" data-remove><i class="bi bi-trash3"></i> Remove</button>
+    </div>
+
+    <input type="file" id="@Model.Name" name="@Model.Name" class="d-none" accept="image/png,image/jpeg,image/webp" data-file />
+    <input type="hidden" name="@Model.RemoveName" value="false" data-removeflag />
+
+    @if (!string.IsNullOrEmpty(Model.Error))
+    {
+        <span class="mm-field-error">@Model.Error</span>
+    }
+</div>

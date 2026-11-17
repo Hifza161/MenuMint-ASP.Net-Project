@@ -1,4 +1,5 @@
-﻿@model MenuMint.ViewModels.DashboardViewModel
+﻿@using MenuMint.ViewModels
+@model DashboardViewModel
 @{
     Layout = "_OwnerLayout";
     ViewData["Title"] = "Dashboard";
@@ -15,32 +16,16 @@
 <!-- Stats -->
 <div class="row g-3 mb-4">
     <div class="col-6 col-xl-3" data-reveal>
-        <div class="mm-card stat-card">
-            <div class="stat-icon"><i class="bi bi-tags"></i></div>
-            <div class="stat-num" data-count="@Model.CategoryCount">0</div>
-            <div class="stat-label">Categories</div>
-        </div>
+        @await Html.PartialAsync("_StatCard", new StatCardVm("bi-tags", "", Model.CategoryCount, "Categories"))
     </div>
     <div class="col-6 col-xl-3" data-reveal data-reveal-delay="1">
-        <div class="mm-card stat-card">
-            <div class="stat-icon coral"><i class="bi bi-egg-fried"></i></div>
-            <div class="stat-num" data-count="@Model.ItemCount">0</div>
-            <div class="stat-label">Menu items</div>
-        </div>
+        @await Html.PartialAsync("_StatCard", new StatCardVm("bi-egg-fried", "coral", Model.ItemCount, "Menu items"))
     </div>
     <div class="col-6 col-xl-3" data-reveal data-reveal-delay="2">
-        <div class="mm-card stat-card">
-            <div class="stat-icon"><i class="bi bi-check2-circle"></i></div>
-            <div class="stat-num" data-count="@Model.AvailableCount">0</div>
-            <div class="stat-label">Available</div>
-        </div>
+        @await Html.PartialAsync("_StatCard", new StatCardVm("bi-check2-circle", "", Model.AvailableCount, "Available"))
     </div>
     <div class="col-6 col-xl-3" data-reveal data-reveal-delay="3">
-        <div class="mm-card stat-card">
-            <div class="stat-icon butter"><i class="bi bi-slash-circle"></i></div>
-            <div class="stat-num" data-count="@Model.SoldOutCount">0</div>
-            <div class="stat-label">Sold out</div>
-        </div>
+        @await Html.PartialAsync("_StatCard", new StatCardVm("bi-slash-circle", "butter", Model.SoldOutCount, "Sold out"))
     </div>
 </div>
 
@@ -91,33 +76,43 @@
                 <h5 class="m-0">Recent items</h5>
                 <a href="/Owner/Items" class="small fw-bold">View all</a>
             </div>
-            @foreach (var it in Model.RecentItems)
+
+            @if (!Model.RecentItems.Any())
             {
-                <div class="recent-row">
-                    <div class="thumb">
-                        @if (!string.IsNullOrEmpty(it.ImagePath))
+                @await Html.PartialAsync("_EmptyState",
+                new EmptyStateVm("🍽️", "No dishes yet", "Add your first dish and it will show up here.",
+                "Add a dish", "/Owner/Items", Compact: true))
+                        }
+            else
+            {
+                foreach (var it in Model.RecentItems)
+                {
+                    <div class="recent-row">
+                        <div class="thumb">
+                            @if (!string.IsNullOrEmpty(it.ImagePath))
+                            {
+                                <img src="@it.ImagePath" alt="" loading="lazy" />
+                            }
+                            else
+                            {
+                                <text>@it.Emoji</text>
+                            }
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="fw-bold">@it.Name</div>
+                            <div class="small text-muted-mm">@it.Category</div>
+                        </div>
+                        <div class="fw-bold text-mint">Rs. @it.Price.ToString("N0")</div>
+                        @if (it.IsAvailable)
                         {
-                            <img src="@it.ImagePath" alt="" loading="lazy" />
+                            <span class="badge-soft">Available</span>
                         }
                         else
                         {
-                            <text>@it.Emoji</text>
+                            <span class="badge-off">Sold out</span>
                         }
                     </div>
-                    <div class="flex-grow-1">
-                        <div class="fw-bold">@it.Name</div>
-                        <div class="small text-muted-mm">@it.Category</div>
-                    </div>
-                    <div class="fw-bold text-mint">Rs. @it.Price.ToString("N0")</div>
-                    @if (it.IsAvailable)
-                    {
-                        <span class="badge-soft">Available</span>
-                    }
-                    else
-                    {
-                        <span class="badge-off">Sold out</span>
-                    }
-                </div>
+                }
             }
         </div>
     </div>

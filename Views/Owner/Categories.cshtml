@@ -1,4 +1,5 @@
-﻿@model List<MenuMint.ViewModels.CategoryRowVm>
+﻿@using MenuMint.ViewModels
+@model List<MenuMint.ViewModels.CategoryRowVm>
 @{
     Layout = "_OwnerLayout";
     ViewData["Title"] = "Categories";
@@ -15,7 +16,12 @@
         <div class="empty-emoji">🗂️</div>
         <h4>No categories yet</h4>
         <p class="text-muted-mm">Start with something like Starters, Main Course, Desserts or Beverages.</p>
-        <button type="button" class="btn btn-mint" data-add><i class="bi bi-plus-lg me-1"></i> Create your first category</button>
+        <div class="d-flex flex-wrap gap-2 justify-content-center">
+            <button type="button" class="btn btn-mint" data-add><i class="bi bi-plus-lg me-1"></i> Create your first category</button>
+            <form asp-action="LoadSample" method="post" class="m-0">
+                <button type="submit" class="btn btn-soft"><i class="bi bi-magic me-1"></i> Load a sample menu</button>
+            </form>
+        </div>
     </div>
 }
 else
@@ -23,42 +29,7 @@ else
     <div class="row g-3">
         @for (int i = 0; i < Model.Count; i++)
         {
-            var c = Model[i];
-            <div class="col-lg-6" data-reveal>
-                <div class="mm-card cat-card @(c.IsActive ? "" : "inactive")">
-                    <div class="cat-order">@(i + 1)</div>
-
-                    <div class="flex-grow-1 min-w-0">
-                        <div class="cat-name text-truncate">@c.Name</div>
-                        <div class="small text-muted-mm">
-                            @c.ItemCount item@(c.ItemCount == 1 ? "" : "s") · @(c.IsActive ? "Visible" : "Hidden") to guests
-                        </div>
-                    </div>
-
-                    <div class="cat-actions">
-                        <form asp-action="ToggleCategory" method="post" class="m-0" title="Show or hide">
-                            <input type="hidden" name="id" value="@c.CategoryId" />
-                            <div class="form-check form-switch m-0 me-1">
-                                <input class="form-check-input" type="checkbox" role="switch" @(c.IsActive ? "checked" : "") onchange="this.form.submit()" aria-label="Toggle visibility" />
-                            </div>
-                        </form>
-
-                        <form asp-action="MoveCategory" method="post" class="m-0">
-                            <input type="hidden" name="id" value="@c.CategoryId" />
-                            <input type="hidden" name="dir" value="up" />
-                            <button type="submit" class="icon-btn" title="Move up" @(i == 0 ? "disabled" : "")><i class="bi bi-arrow-up"></i></button>
-                        </form>
-                        <form asp-action="MoveCategory" method="post" class="m-0">
-                            <input type="hidden" name="id" value="@c.CategoryId" />
-                            <input type="hidden" name="dir" value="down" />
-                            <button type="submit" class="icon-btn" title="Move down" @(i == Model.Count - 1 ? "disabled" : "")><i class="bi bi-arrow-down"></i></button>
-                        </form>
-
-                        <button type="button" class="icon-btn" title="Rename" data-edit data-id="@c.CategoryId" data-name="@c.Name"><i class="bi bi-pencil"></i></button>
-                        <button type="button" class="icon-btn danger" title="Delete" data-delete data-id="@c.CategoryId" data-name="@c.Name" data-count="@c.ItemCount"><i class="bi bi-trash3"></i></button>
-                    </div>
-                </div>
-            </div>
+            @await Html.PartialAsync("_CategoryCard", new CategoryCardVm(Model[i], i + 1, Model.Count))
         }
     </div>
 }

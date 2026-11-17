@@ -1,0 +1,11 @@
+﻿@using MenuMint.ViewModels
+@model EmptyStateVm
+<div class="@(Model.Compact ? "empty-state empty-compact" : "mm-card empty-state")">
+    <div class="empty-emoji">@Model.Emoji</div>
+    <h5>@Model.Title</h5>
+    <p class="text-muted-mm @(string.IsNullOrEmpty(Model.ButtonUrl) ? "mb-0" : "")">@Model.Text</p>
+    @if (!string.IsNullOrEmpty(Model.ButtonUrl))
+    {
+        <a href="@Model.ButtonUrl" class="btn btn-mint">@Model.ButtonText</a>
+    }
+</div>

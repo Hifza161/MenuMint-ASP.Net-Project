@@ -74,14 +74,7 @@
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     <script src="~/js/owner.js" asp-append-version="true"></script>
-    @if (TempData["Success"] is string okMsg)
-    {
-        <script>MM.toast(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(okMsg)), 4000);</script>
-    }
-    @if (TempData["Error"] is string errMsg)
-    {
-        <script>MM.toast(@Html.Raw(System.Text.Json.JsonSerializer.Serialize(errMsg)), 4000);</script>
-    }
+    <partial name="_Toasts" />
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

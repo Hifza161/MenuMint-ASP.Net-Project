@@ -1,4 +1,5 @@
-﻿@model MenuMint.ViewModels.AdminDashboardViewModel
+﻿@using MenuMint.ViewModels
+@model MenuMint.ViewModels.AdminDashboardViewModel
 @{
     Layout = "_AdminLayout";
     ViewData["Title"] = "Admin dashboard";
@@ -15,32 +16,16 @@
 <!-- Stat cards -->
 <div class="row g-3 mb-4">
     <div class="col-6 col-xl-3" data-reveal>
-        <div class="mm-card stat-card">
-            <div class="stat-icon"><i class="bi bi-shop-window"></i></div>
-            <div class="stat-num" data-count="@Model.Total">0</div>
-            <div class="stat-label">Restaurants</div>
-        </div>
+        @await Html.PartialAsync("_StatCard", new StatCardVm("bi-shop-window", "", Model.Total, "Restaurants"))
     </div>
     <div class="col-6 col-xl-3" data-reveal data-reveal-delay="1">
-        <div class="mm-card stat-card">
-            <div class="stat-icon"><i class="bi bi-check2-circle"></i></div>
-            <div class="stat-num" data-count="@Model.Active">0</div>
-            <div class="stat-label">Active</div>
-        </div>
+        @await Html.PartialAsync("_StatCard", new StatCardVm("bi-check2-circle", "", Model.Active, "Active"))
     </div>
     <div class="col-6 col-xl-3" data-reveal data-reveal-delay="2">
-        <div class="mm-card stat-card">
-            <div class="stat-icon butter"><i class="bi bi-pause-circle"></i></div>
-            <div class="stat-num" data-count="@Model.Inactive">0</div>
-            <div class="stat-label">Deactivated</div>
-        </div>
+        @await Html.PartialAsync("_StatCard", new StatCardVm("bi-pause-circle", "butter", Model.Inactive, "Deactivated"))
     </div>
     <div class="col-6 col-xl-3" data-reveal data-reveal-delay="3">
-        <div class="mm-card stat-card">
-            <div class="stat-icon coral"><i class="bi bi-egg-fried"></i></div>
-            <div class="stat-num" data-count="@Model.TotalItems">0</div>
-            <div class="stat-label">Menu items listed</div>
-        </div>
+        @await Html.PartialAsync("_StatCard", new StatCardVm("bi-egg-fried", "coral", Model.TotalItems, "Menu items listed"))
     </div>
 </div>
 

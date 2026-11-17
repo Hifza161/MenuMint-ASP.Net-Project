@@ -1,0 +1,7 @@
+﻿@using MenuMint.ViewModels
+@model StatCardVm
+<div class="mm-card stat-card">
+    <div class="stat-icon @Model.Tone"><i class="bi @Model.Icon"></i></div>
+    <div class="stat-num" data-count="@Model.Value">0</div>
+    <div class="stat-label">@Model.Label</div>
+</div>
